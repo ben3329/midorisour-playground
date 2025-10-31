@@ -91,7 +91,7 @@ const config: Config = {
         {to: '/showcase', label: 'Showcase', position: 'left'},
         {to: '/resume', label: 'Resume', position: 'right'},
         {
-          href: 'https://github.com/facebook/docusaurus',
+          href: 'https://github.com/ben3329',
           label: 'GitHub',
           position: 'right',
         },

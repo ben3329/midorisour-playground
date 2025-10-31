@@ -1,19 +1,20 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+fastapi:
+  label: FastAPI
+  permalink: /fastapi
+  description: FastAPI tag description
 
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
+openapi:
+  label: OpenAPI
+  permalink: /openapi
+  description: OpenAPI tag description
 
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
 
-hola:
-  label: Hola
-  permalink: /hola
-  description: Hola tag description
+openapi-generator-cli:
+  label: OpenAPI Generator CLI
+  permalink: /openapi-generator-cli
+  description: OpenAPI Generator CLI tag description
+
+code-generator:
+  label: Code Generator
+  permalink: /code-generator
+  description: Code Generator tag description
