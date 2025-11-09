@@ -1,20 +1,20 @@
 fastapi:
   label: FastAPI
   permalink: /fastapi
-  description: FastAPI tag description
+  description: related to FastAPI framework
 
 openapi:
   label: OpenAPI
   permalink: /openapi
-  description: OpenAPI tag description
+  description: related to OpenAPI specification
 
 
 openapi-generator-cli:
   label: OpenAPI Generator CLI
   permalink: /openapi-generator-cli
-  description: OpenAPI Generator CLI tag description
+  description: related to OpenAPI Generator CLI
 
 code-generator:
   label: Code Generator
   permalink: /code-generator
-  description: Code Generator tag description
+  description: related to Code Generator
