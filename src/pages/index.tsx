@@ -46,15 +46,19 @@ function Skills(): ReactNode {
   const skills = [
     {
       title: 'Backend',
-      items: ['Python', 'FastAPI', 'Node.js', 'REST/GraphQL', 'PostgreSQL'],
-    },
-    {
-      title: 'Frontend / Mobile',
-      items: ['TypeScript', 'React', 'Flutter', 'Next.js'],
+      items: ['Python', 'FastAPI', 'Flask', 'Django', 'RESTful API', 'MySQL'],
     },
     {
       title: 'Cloud / DevOps',
-      items: ['AWS', 'Docker', 'CI/CD', 'Infra as Code'],
+      items: ['AWS', 'Github Actions', 'Docker', 'Kubernetes'],
+    },
+    {
+      title: 'Frontend / Mobile',
+      items: ['Flutter'],
+    },
+    {
+      title: 'Others',
+      items: ['C/C++'],
     },
   ];
   return (

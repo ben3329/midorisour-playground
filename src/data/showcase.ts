@@ -1,10 +1,5 @@
 export type TagType =
-  | 'opensource'
-  | 'product'
   | 'personal'
-  | 'design'
-  | 'i18n'
-  | 'tool'
   | 'library';
 
 export type ShowcaseProject = {
@@ -19,12 +14,7 @@ export type ShowcaseProject = {
 };
 
 export const TAG_LABELS: Record<TagType, string> = {
-  opensource: 'Open Source',
-  product: 'Product',
   personal: 'Personal',
-  design: 'Design',
-  i18n: 'i18n',
-  tool: 'Tool',
   library: 'Library',
 };
 
@@ -33,31 +23,21 @@ export const AllTags: TagType[] = Object.keys(TAG_LABELS) as TagType[];
 // Seed with a couple of examples. Replace with your own projects.
 export const Projects: ShowcaseProject[] = [
   {
+    title: 'Portfolio',
+    description: '개인 포트폴리오 목록과 상세 페이지',
+    website: '/portfolio',
+    image: '/img/logo.png',
+    tags: ['personal'],
+    addedAt: '2025-11-10',
+  },
+  {
     title: 'My Awesome App',
     description: 'A production-ready app with delightful UX.',
     website: 'https://example.com',
     source: 'https://github.com/example/app',
     image: '/img/showcase/placeholder.svg',
-    tags: ['product', 'design'],
+    tags: ['library'],
     addedAt: '2025-01-01',
-  },
-  {
-    title: 'Useful CLI Tool',
-    description: 'Lightweight developer tool that boosts productivity.',
-    website: 'https://example.com/cli',
-    source: 'https://github.com/example/cli',
-    image: '/img/showcase/placeholder.svg',
-    tags: ['opensource', 'tool'],
-    addedAt: '2025-02-10',
-  },
-  {
-    title: 'UI Library',
-    description: 'Composable UI primitives for React.',
-    website: 'https://example.com/ui',
-    source: 'https://github.com/example/ui',
-    image: '/img/showcase/placeholder.svg',
-    tags: ['opensource', 'library', 'design'],
-    addedAt: '2025-03-05',
   },
 ];
 

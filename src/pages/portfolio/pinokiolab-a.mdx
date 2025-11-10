@@ -1,0 +1,246 @@
+---
+title: A사 외부 데이터 조회 시스템
+description: A사 외부 데이터 조회 시스템 포트폴리오
+---
+
+import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
+import PortfolioLayout from '@site/src/components/PortfolioLayout';
+
+<PortfolioLayout>
+  <Heading as="h1">A사 외부 데이터 조회 시스템</Heading>
+
+  <p style={{marginTop: 8, opacity: 0.85}}> Pinokolab에서 서비스 중인 TIMS 시스템으로 수집된 데이터를 A사에서 조회할 수 있도록 개발한 시스템입니다.</p>
+
+  ## 📝개요
+
+  - 목적: A사에서 Pinokiolab의 서비스 중 하나인 TIMS(지재권 감정 지원 플랫폼)의 데이터를 조회하기 위한 서비스 제공
+  - 주요 기능: 계정/권한 관리, TIMS 데이터 조회, 통계, 검사 보고서/인보이스/이미지 다운로드 제공, A사 개발용 공개 API 제공
+  - 담당 역할: 팀장, Backend 개발
+  - 기간: 2025.07 ~ 2025.10
+
+  ## 🛠️기술스택
+
+  - Backend: FastAPI (ASGI)
+  - Auth: AWS Cognito
+  - Rate limiting: SlowAPI(AWS ElastiCache - Valkey)
+  - Cache: fastapi-cache (AWS ElastiCache - Valkey)
+  - DB: SQLModel + AsyncSession, Alembic, MySQL
+  - Storage: AWS S3
+  - Image Serving: AWS Cloudfront
+  - Packaging: Poetry, Docker, AWS ECS
+  - Linting: Black, Isort, Ruff
+
+  ## 🏗️Architecture
+
+  ### System Design
+  
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload#%7B%22pageId%22%3A%22IW8c-r90-Pk6t1E2gGuP%22%7D"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+
+  ### Service Flow
+
+  - 인증
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=dwvCzT2rjPbfZCiZXhEt&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+    
+  - 계정 생성
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=sjwKsmKLNyCVRkISQtIr&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+
+  - 데이터, 통계 조회 / 증명서 발급
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=iRDKAXO0QV2kOKq7Bxqs&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+ 
+  - 사진 다운로드
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=H_xPDRhncyQwDVayX4LG&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+
+  ### Directory Structure
+```bash
+.
+├── alembic.ini
+├── app
+│   ├── api # API Endpoint 관련 코드
+│   │   ├── routers.py
+│   │   └── v1
+│   │       ├── endpoints
+│   │       │   └── ...
+│   │       └── routers.py
+│   ├── assets # image, docx 등 정적 파일
+│   │   └── ...
+│   ├── core # 다른 곳에서 사용할 공통 코드
+│   │   ├── classes
+│   │   │   └── ...
+│   │   ├── constants
+│   │   │   └── ...
+│   │   ├── decorators
+│   │   │   └── ...
+│   │   ├── dependencies
+│   │   │   └── ...
+│   │   └── config.py
+│   ├── db # db 관련 코드
+│   │   ├── database.py
+│   │   ├── tables.py
+│   │   └── tims_views
+│   │       └── ...
+│   ├── filters # 데이터 조회 시 사용할 필터 모음
+│   │   └── ...
+│   ├── schemas # api, services에서 사용할 pydantic 모델 정의
+│   │   └── ...
+│   ├── services # 외부 서비스 연결, 여러 api가 공유할 수 있는 코드, 너무 긴 코드
+│   │   └── ...
+│   ├── utils
+│   │   └── ...
+│   └── main.py
+├── .env
+├── docker-compose.yaml
+├── dockerfile
+├── migrations
+│   ├── ...
+│   └── versions
+│       └── 0000_init.py
+├── poetry.lock
+├── pyproject.toml
+├── pytest.ini
+├── ruff.toml
+├── tests
+│   ├── api
+│   │   └── v1
+│   │       └── endpoints
+│   │           └── ...
+│   └── conftest.py
+└── utils
+    └── create_revision.sh # alembic 새 버전 생성 스크립트
+```
+
+  ## 💡Key Contributions
+
+  - 프로젝트 설계
+    - 프로젝트 기본 디렉토리 구조 확립
+      - 기존 다른 프로젝트들은 각 폴더별 기능 정의가 명확하지 않아 코드 위치가 중구난방이었으나 이 프로젝트를 통해 기본 폴더 구조 확립
+    - 전체 시스템 디자인
+      <Toggle title="TIMS에서 API를 직접 제공하는 것이 아닌 별도 시스템으로 분리">
+        - 회사 내부에서 A사에 API를 제공했을 때 해킹에 대한 우려가 많아 이를 불식시키기 위해 선택
+        - TIMS 시스템과는 상관 없이 안정적인 성능을 제공하기 위해 선택
+          - 해당 시스템도 A사가 Web을 통해 조회할 수 있는 시스템, A사 프로그램이 접근할 수 있는 API를 제공하는 시스템으로 분리
+      </Toggle>
+      <Toggle title="데이터 조회를 위해 View사용">
+        - 개발 공수를 줄이기 위해 선택
+            - TIMS와 API를 통해 통신할 경우 TIMS에도 API를 개발해야 함
+            - 데이터 조회 시 공통 조건이 매우 복합적이라 매번 같은 코드를 작성하지 않기 위함
+            - 데이터 조회 시 제약 조건이 변경될 확률이 높음
+        - API도 제공할 예정이라 고객사 개발자와 원활한 소통을 위해 선택
+            - 기존 시스템에서 사용하던 용어와 고객사에서 사용하는 용어가 달라 고객사에 용어를 맞추기 위해 선택
+        - TIMS의 중요 데이터에 대한 불필요한 접근을 차단하기 위해 선택
+            - 특정 조건의 데이터만 조회 가능해야 함
+            - 혹시나 해당 시스템이 해킹 되었을 때 view 조회만 가능하게 하여 TIMS에 접근하지 못하게 하기 위함
+        - 실제로 개발 기간 동안 용어 변경 요청이 자주 있었고 간단한 수정만으로 대응함
+      </Toggle>
+      <Toggle title="사진 다운로드 시 여러 단계로 나눠서 진행">
+        - 단계
+          1. 압축 파일 생성 요청
+          2. 압축 완료 여부 확인
+          3. 다운로드
+        - 사진 다운로드 시 많은 양의 사진을 한번에 받아야 해서 한 트랜잭션으로 설계할 경우 기다리는 시간이 너무 길어지게 되므로 사용성을 위해 여러 단계로 나눠서 진행하는 방식으로 설계
+        - 기존에 만들어뒀던 파일 압축 서비스가 있어 해당 서비스 재사용
+      </Toggle>
+  - 환경변수와 Decorator를 통한 API 공개 여부 제어
+    - [Source Code](https://github.com/ben3329/code-notes/blob/main/python/fastapi/examples/api_filtering.py)
+  - View 성능 개선
+    - JOIN 해야 할 테이블이 많고, 제한해야 할 조건이 많고, 데이터 표현 방식을 다르게 해야 할 것이 많아 간단하게 만들었을 때 View 성능이 많이 느렸음
+    - 성능 변화: 3s → 0.1s 이하
+    - 개선 사항(컬럼명은 예시)
+        <Toggle title="기존 DB Index 수정">
+          - 성능 저하 원인
+            - 기존에는 `is_deleted` 컬럼에 Index가 걸려 있었음
+            - View에 기본적으로 있는 제약 조건은 `is_deleted` , `created_at` 이어서 두 컬럼으로 Index 추가
+            - View 실행 시 Optimizer가 새로운 Index가 아닌 기존 Index를 참조하여 속도 저하
+              - EXPLAIN 쿼리 분석
+          - 해결
+            - 기존에 `is_deleted`에 걸려있던 Index 삭제
+        </Toggle>
+        <Toggle title="Computed Column 추가">
+          - 성능 저하 원인
+            - 시간 데이터 계산
+              - 기존 시스템에서는 시간 값으로 UTC Datetime을 사용
+              - 고객사에서는 KST Date가 필요
+              - View에서 해당 컬럼에 DATE, DATE_ADD 연산 사용해서 조회한 것이 원인이 됨
+            - 문자열 비교 제약조건
+              - 제약 조건에 문자열 비교를 복합적으로 해야하는 조건이 존재
+          - 해결
+            - 기존 DB에 Computed Column을 추가하고 해당 View가 해당 컬럼을 사용하도록 변경
+        </Toggle>
+        <Toggle title="JOIN 성능 개선">
+          - 성능 저하 원인
+            - MAIN 테이블에 많은 데이터가 존재
+            - MAIN 테이블이 정규화가 많이 되어 있고 JOIN 해야 할 참조 테이블도 많아 JOIN 성능이 약간 떨어짐
+          - 해결
+            - JOIN에 제약조건을 추가하여 첫 조인 시 이후 조인할 데이터를 줄임
+            - STRAIGHT JOIN으로 JOIN 순서를 명시하여 Optimizer가 올바른 순서로 JOIN 하도록 함
+        </Toggle>
+  - Backend 전반 개발
+  - API 문서 작성
+    - FastAPI의 기능을 적극 활용하여 자세한 API 문서 작성
+</PortfolioLayout>
+
