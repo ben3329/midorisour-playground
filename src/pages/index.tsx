@@ -65,7 +65,7 @@ function Skills(): ReactNode {
     <section className={styles.section}>
       <div className="container">
         <Heading as="h2" className={styles.sectionTitle}>What I Do</Heading>
-        <div className="row">
+        <div className={clsx('row', styles.skillRow)}>
           {skills.map((s) => (
             <div className="col col--4" key={s.title}>
               <div className={styles.card}>
@@ -138,75 +138,6 @@ function Contact(): ReactNode {
   );
 }
 
-function Highlights(): ReactNode {
-  const items = [
-    {
-      title: 'Built high‑traffic FastAPI backend',
-      period: '2024',
-      details: 'Designed and shipped a FastAPI service handling 50k+ daily requests with zero downtime, using async workers and PostgreSQL.'
-    },
-    {
-      title: 'Flutter app from scratch',
-      period: '2023',
-      details: 'Led development of a cross‑platform Flutter app with CI/CD, feature flags, and analytics.'
-    },
-    {
-      title: 'Infra/DevOps improvements',
-      period: '2022',
-      details: 'Dockerized services, set up GitHub Actions pipelines, and IaC for repeatable environments.'
-    }
-  ];
-  return (
-    <section className={styles.section}>
-      <div className="container">
-        <Heading as="h2" className={styles.sectionTitle}>Highlights</Heading>
-        <div className={styles.timeline}>
-          {items.map((h) => (
-            <details key={h.title} className={styles.timelineItem} open>
-              <summary>
-                <span className={styles.badge}>{h.period}</span>
-                <span className={styles.timelineTitle}>{h.title}</span>
-              </summary>
-              <p className={styles.timelineBody}>{h.details}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Testimonials(): ReactNode {
-  const items = [
-    {
-      quote:
-        'Consistently delivers clean, reliable backend code and communicates tradeoffs clearly.',
-      name: 'EM, Backend Platform',
-    },
-    {
-      quote: 'Turns ambiguous problems into shipped features with minimal oversight.',
-      name: 'Product Manager',
-    },
-  ];
-  return (
-    <section className={clsx(styles.section, styles.sectionAlt)}>
-      <div className="container">
-        <Heading as="h2" className={styles.sectionTitle}>Testimonials</Heading>
-        <div className="row">
-          {items.map((t) => (
-            <div className="col col--6" key={t.name}>
-              <div className={styles.card}>
-                <p className={styles.quote}>“{t.quote}”</p>
-                <p className={styles.quoteBy}>— {t.name}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -214,10 +145,8 @@ export default function Home(): ReactNode {
       <Hero />
       <main>
         <Skills />
-        <Highlights />
         <FeaturedPosts />
         <FeaturedProjects />
-        <Testimonials />
         <Contact />
       </main>
     </Layout>

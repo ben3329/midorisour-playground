@@ -99,6 +99,10 @@
   margin: .5rem 0 0 0;
 }
 
+.skillRow {
+  row-gap: 1.5rem;
+}
+
 .pill {
   padding: .25rem .5rem;
   border: 1px solid var(--ifm-toc-border-color);
