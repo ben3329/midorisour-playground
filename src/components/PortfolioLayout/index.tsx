@@ -22,7 +22,7 @@ export default function PortfolioLayout({children}: Props) {
   const active = useActiveSlug();
 
   return (
-    <div className={`container ${styles.root}`}>
+    <div className={styles.root}>
       <aside className={styles.sidebar} aria-label="Portfolio list">
         <div className={styles.sidebarHeader}>
           <h2 className={styles.sidebarTitle}>Portfolio</h2>

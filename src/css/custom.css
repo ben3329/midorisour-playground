@@ -28,3 +28,19 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+html.portfolio-page .theme-layout-main,
+.theme-layout-main.portfolio-page {
+  max-width: 1440px;
+  width: 100%;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+@media (max-width: 996px) {
+  html.portfolio-page .theme-layout-main,
+  .theme-layout-main.portfolio-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}

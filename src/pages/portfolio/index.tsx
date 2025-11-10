@@ -5,7 +5,10 @@ import PortfolioLayout from '../../components/PortfolioLayout';
 
 export default function PortfolioIndexPage() {
   return (
-    <Layout title="Portfolio" description="포트폴리오 목록">
+    <Layout
+      title="Portfolio"
+      description="포트폴리오 목록"
+      wrapperClassName="portfolio-page">
       <Head>
         <meta name="robots" content="index,follow" />
       </Head>
