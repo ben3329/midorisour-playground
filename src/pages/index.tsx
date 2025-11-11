@@ -46,7 +46,7 @@ function Skills(): ReactNode {
   const skills = [
     {
       title: 'Backend',
-      items: ['Python', 'FastAPI', 'Flask', 'Django', 'RESTful API', 'MySQL'],
+      items: ['Python', 'FastAPI', 'Flask', 'Django', 'MySQL'],
     },
     {
       title: 'Cloud / DevOps',

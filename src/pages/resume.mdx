@@ -5,34 +5,554 @@ description: One‑page resume
 
 import Heading from '@theme/Heading';
 
-<Heading as="h1">Resume</Heading>
+export const skills = [
+  { label: 'Backend', items: ['Python', 'FastAPI', 'Flask', 'Django', 'MySQL'] },
+  { label: 'Cloud / DevOps', items: ['AWS', 'GitHub Actions', 'Docker', 'Kubernetes'] },
+  { label: 'Frontend / Mobile', items: ['Flutter'] },
+  { label: 'Others', items: ['C', 'C++'] },
+];
 
-If you prefer a PDF, please download it here later after you add it at `static/resume.pdf`.
+export const links = [
+  { label: 'Email', value: 'ben3329@naver.com', href: 'mailto:ben3329@naver.com' },
+  { label: 'GitHub', value: 'github.com/ben3329', href: 'https://github.com/ben3329' },
+  { label: 'LinkedIn', value: 'linkedin.com/in/weonhyeok-ji-8810ba168', href: 'https://www.linkedin.com/in/weonhyeok-ji-8810ba168' },
+];
 
-## Profile
+export const experiences = [
+  {
+    company: '피노키오랩주식회사',
+    role: '백엔드 개발자 · 팀 리드',
+    period: '2023.09 ~ 현재',
+    projects: [
+        {
+            name: 'AI 기반 영상 분석 플랫폼 개발',
+            period: '2023.09 ~ 현재',
+            summary: 'AI 모델과 연동되는 영상 분석 플랫폼의 백엔드 개발과 팀 리딩을 담당하고 있습니다.',
+            highlights: [
+                'FastAPI와 PostgreSQL을 활용한 확장성 높은 백엔드 아키텍처 설계 및 구현',
+                'AWS 인프라 구축 및 관리로 안정적인 서비스 운영 환경 마련',
+                '팀원들과의 긴밀한 협업을 통해 프로젝트 일정 준수 및 품질 향상',
+            ],
+            stack: ['Python', 'FastAPI', 'PostgreSQL', 'AWS', 'Docker', 'GitHub Actions'],
+        }
+    ],
+  },
+  {
+    company: '주식회사 윈스',
+    role: '주임 연구원',
+    period: '2019.11 ~ 2023.03',
+    projects: [
+      {
+        name: 'PS 클라우드 제품화',
+        period: '2022.01 ~ 2023.02',
+        summary: 'IPS 솔루션을 클라우드 환경에서 서비스화하기 위한 프로젝트에 참여하여 사내 테스트 인프라를 구축하고 기능을 구현했습니다.',
+        highlights: [
+            'OpenStack 기반 사내 프라이빗 클라우드 테스트베드를 구축하고 안정화',
+            'Open vSwitch와 Kubernetes를 연동해 네트워크 가상화 및 자원 배분 자동화',
+            '제품 내 네트워크 인터페이스 설정 기능을 구현해 배포·운영 효율 향상',
+        ],
+        stack: ['C', 'Bash','Python', 'OpenStack', 'Open vSwitch', 'Kubernetes'],
+      },
+      {
+        name: 'Open vSwitch·Kubernetes 연동 네트워크 자동화',
+        period: '2022.01 ~ 2023.02',
+        summary: '컨테이너 기반 패킷 분석 워크로드를 위해 가상 네트워크와 자원 배분을 자동화했습니다.',
+        highlights: [
+          'OVS + SR-IOV 파이프라인을 Kubernetes CNI로 통합해 지연시간 15% 절감',
+          '실시간 모니터링/Healing 스크립트로 운영 장애 대응 시간 50% 축소',
+        ],
+        stack: ['Python', 'Go', 'Open vSwitch', 'Kubernetes'],
+      },
+    ],
+  },
+];
 
-Backend/Full‑stack engineer focusing on Python/FastAPI, TypeScript/React/Flutter, and cloud‑native delivery. I build reliable services, keep DX simple, and ship.
+export const education = [
+  { school: '학점은행제', detail: '정보보호학 학사', period: '2017 ~ 2019' },
+  { school: '협성대학교', detail: '신학 학사', period: '2010 ~ 2014' },
+];
 
-## Skills
+export const certifications = [{ name: '정보처리기사', year: '2018' }];
 
-- Backend: Python, FastAPI, Node.js, REST/GraphQL, PostgreSQL
-- Frontend/Mobile: TypeScript, React, Flutter, Next.js
-- Cloud/DevOps: AWS, Docker, CI/CD, Infrastructure as Code
+export const Pill = ({ children }) => <span className="resume-pill">{children}</span>;
 
-## Experience
+export const Headline = () => (
+  <div className="resume-hero">
+    <div>
+      <p className="resume-eyebrow">Backend · DevOps · Team Lead</p>
+      <Heading as="h1">
+        지원혁 <span className="resume-hero__role">Backend Engineer</span>
+      </Heading>
+      <p className="resume-hero__lead">
+        복잡한 문제를 집요하게 해결하는 Python/FastAPI 백엔드 개발자입니다. 팀 리딩과 기획·설계, DevOps를 직접 맡으며
+        협업과 커뮤니케이션의 중요성을 깊이 이해하고 있습니다. 지속적인 개선과 빠른 적응을 강점으로 삼고 있습니다.
+      </p>
+    </div>
+    <div className="resume-hero__pills">
+      <Pill>Python &amp; FastAPI</Pill>
+      <Pill>DevOps &amp; Architecture</Pill>
+      <Pill>Team Leading</Pill>
+    </div>
+  </div>
+);
 
-### Senior Software Engineer — Recent
+<div className="resume-page">
+  <Headline />
 
-- Built FastAPI services processing 50k+ daily requests with async IO and solid observability.
-- Led Flutter app delivery end‑to‑end (feature flags, analytics, crash reporting).
-- Introduced CI/CD pipelines and containerized workloads for predictable releases.
+  <div className="resume-grid">
+    <section className="resume-card">
+      <p className="resume-eyebrow">Profile</p>
+      <h2>문제를 집요하게 풀어내는 백엔드 개발자</h2>
+      <p>
+        안녕하세요. 백엔드 개발자 지원혁 입니다. Python과 FastAPI를 중심으로 다양한 라이브러리와 아키텍처를 경험하며, 복잡한 문제를
+        집요하게 해결해왔습니다.
+      </p>
+      <p>
+        팀 리딩, DevOps, 기획 및 설계 등 개발 외적인 업무도 직접 맡으며 협업과 커뮤니케이션의 중요성을 깊이 이해하고 있습니다. 기술적인
+        도전을 즐기고, 더 나은 방향을 늘 고민하며 지속적인 개선과 빠른 적응을 강점으로 삼고 있습니다.
+      </p>
+    </section>
 
-## Education
+    <section className="resume-card">
+      <p className="resume-eyebrow">Skills</p>
+      <h2>핵심 역량</h2>
+      <div className="resume-skill-grid">
+        {skills.map(({ label, items }) => (
+          <div key={label} className="resume-skill">
+            <p>{label}</p>
+            <div className="resume-tag-list">
+              {items.map((item) => (
+                <span key={item} className="resume-tag">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
 
-- B.S. in Computer Science (or equivalent experience)
+    <section className="resume-card">
+      <p className="resume-eyebrow">Links</p>
+      <h2>연락처 &amp; 프로필</h2>
+      <ul className="resume-link-list">
+        {links.map((link) => (
+          <li key={link.label}>
+            <span>{link.label}</span>
+            <a href={link.href} target="_blank" rel="noreferrer">
+              {link.value}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
 
-## Links
+  <section className="resume-section resume-experience">
+    <div className="resume-section__header">
+      <p className="resume-eyebrow">Experience</p>
+      <h2>경력 사항</h2>
+      <p>서비스 아키텍처 설계에서 인프라·운영까지 전 과정을 경험하며 실행력을 높였습니다.</p>
+    </div>
 
-- Email: mailto:ben3329@naver.com
-- GitHub: https://github.com/ben3329
-- LinkedIn: https://www.linkedin.com/in/weonhyeok-ji-8810ba168
+    <div className="resume-timeline">
+      {experiences.map((exp) => {
+        const hasProjectDetails = Array.isArray(exp.projects) && exp.projects.length > 0;
+
+        return (
+          <article key={exp.company} className="resume-timeline__item">
+            <div className="resume-timeline__meta">
+              <p className="resume-eyebrow">{exp.period}</p>
+              <h3>{exp.company}</h3>
+              <p className="resume-role">{exp.role}</p>
+              {!hasProjectDetails && exp.project && (
+                <p className="resume-project">{exp.project}</p>
+              )}
+            </div>
+
+            {hasProjectDetails ? (
+              <div className="resume-project-grid">
+                {exp.projects.map((project, index) => {
+                  const highlightList = Array.isArray(project.highlights) ? project.highlights : [];
+                  const stackList = Array.isArray(project.stack) ? project.stack : [];
+                  const key = `${exp.company}-project-${project.name ?? index}`;
+
+                  return (
+                    <div key={key} className="resume-project-card">
+                      <div className="resume-project-card__header">
+                        <p className="resume-project-card__name">{project.name}</p>
+                        {project.period && (
+                          <span className="resume-project-card__period">{project.period}</span>
+                        )}
+                      </div>
+                      {project.summary && <p>{project.summary}</p>}
+                      {highlightList.length > 0 && (
+                        <ul>
+                          {highlightList.map((highlight) => (
+                            <li key={`${key}-${highlight}`}>{highlight}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {stackList.length > 0 && (
+                        <div className="resume-tag-list">
+                          {stackList.map((tech) => (
+                            <span
+                              key={`${key}-${tech}`}
+                              className="resume-tag resume-tag--ghost"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <>
+                <p>{exp.summary}</p>
+                <ul>
+                  {exp.highlights.map((highlight) => (
+                    <li key={highlight}>{highlight}</li>
+                  ))}
+                </ul>
+                <div className="resume-tag-list">
+                  {exp.stack.map((tech) => (
+                    <span key={tech} className="resume-tag resume-tag--ghost">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  </section>
+
+  <div className="resume-grid">
+    <section className="resume-card">
+      <p className="resume-eyebrow">Education</p>
+      <h2>학력</h2>
+      <ul className="resume-list">
+        {education.map((item) => (
+          <li key={item.school}>
+            <div>
+              <strong>{item.school}</strong>
+              <p>{item.detail}</p>
+            </div>
+            <span>{item.period}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section className="resume-card">
+      <p className="resume-eyebrow">Certifications</p>
+      <h2>자격증</h2>
+      <ul className="resume-list">
+        {certifications.map((cert) => (
+          <li key={cert.name}>
+            <div>
+              <strong>{cert.name}</strong>
+            </div>
+            <span>{cert.year}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</div>
+
+<style>{`
+:root {
+  --resume-accent: #3fce7b;
+  --resume-muted: #4b5b55;
+  --resume-dark: #083127;
+  --resume-card-bg: rgba(246, 255, 249, 0.92);
+  --resume-border: rgba(63, 206, 123, 0.35);
+  --resume-card-border: rgba(8, 49, 39, 0.08);
+  --resume-card-shadow: 0 15px 32px -22px rgba(8, 49, 39, 0.45);
+  --resume-hero-bg: radial-gradient(circle at top, rgba(63, 206, 123, 0.22), transparent 55%),
+    linear-gradient(135deg, rgba(10, 138, 118, 0.25), rgba(63, 206, 123, 0.45));
+  --resume-hero-shadow: 0 25px 50px -18px rgba(8, 49, 39, 0.35);
+  --resume-pill-bg: rgba(63, 206, 123, 0.18);
+  --resume-pill-border: rgba(8, 49, 39, 0.12);
+  --resume-tag-bg: rgba(63, 206, 123, 0.18);
+  --resume-tag-ghost-bg: rgba(8, 49, 39, 0.05);
+  --resume-tag-ghost-border: rgba(8, 49, 39, 0.25);
+  --resume-divider: rgba(8, 49, 39, 0.12);
+  --resume-marker-glow: rgba(63, 206, 123, 0.25);
+}
+
+[data-theme='dark'] {
+  --resume-muted: #9dcfb5;
+  --resume-dark: #f4fff9;
+  --resume-card-bg: rgba(5, 21, 18, 0.92);
+  --resume-border: rgba(63, 206, 123, 0.55);
+  --resume-card-border: rgba(63, 206, 123, 0.25);
+  --resume-card-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.65);
+  --resume-hero-bg: radial-gradient(circle at top, rgba(92, 255, 190, 0.15), transparent 55%),
+    linear-gradient(135deg, rgba(5, 76, 63, 0.85), rgba(21, 131, 109, 0.65));
+  --resume-hero-shadow: 0 30px 60px -25px rgba(0, 0, 0, 0.75);
+  --resume-pill-bg: rgba(63, 206, 123, 0.22);
+  --resume-pill-border: rgba(63, 206, 123, 0.4);
+  --resume-tag-bg: rgba(63, 206, 123, 0.2);
+  --resume-tag-ghost-bg: rgba(255, 255, 255, 0.06);
+  --resume-tag-ghost-border: rgba(159, 255, 210, 0.3);
+  --resume-divider: rgba(255, 255, 255, 0.08);
+  --resume-marker-glow: rgba(63, 206, 123, 0.35);
+}
+
+.resume-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding-bottom: 4rem;
+}
+
+.resume-hero {
+  background: var(--resume-hero-bg);
+  border: 1px solid var(--resume-border);
+  border-radius: 1.5rem;
+  padding: 2.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: center;
+  box-shadow: var(--resume-hero-shadow);
+}
+
+.resume-hero__role {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--resume-muted);
+  margin-left: 0.75rem;
+}
+
+.resume-hero__lead {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  max-width: 60ch;
+}
+
+.resume-hero__pills {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.resume-pill {
+  background: var(--resume-pill-bg);
+  color: var(--resume-dark);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid var(--resume-pill-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.resume-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: var(--resume-muted);
+  margin-bottom: 0.6rem;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.resume-card,
+.resume-section {
+  background: var(--resume-card-bg);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+  border: 1px solid var(--resume-card-border);
+  box-shadow: var(--resume-card-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.resume-card h2,
+.resume-section h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.resume-skill-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resume-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.resume-tag {
+  background: var(--resume-tag-bg);
+  color: var(--resume-dark);
+  border-radius: 0.7rem;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.resume-tag--ghost {
+  background: var(--resume-tag-ghost-bg);
+  border: 1px dashed var(--resume-tag-ghost-border);
+}
+
+.resume-link-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.resume-link-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.resume-link-list span {
+  font-size: 0.85rem;
+  color: var(--resume-muted);
+}
+
+.resume-link-list a {
+  color: var(--resume-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.resume-section__header {
+  margin-bottom: 1.75rem;
+}
+
+.resume-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.resume-timeline__item {
+  border-left: 2px solid var(--resume-border);
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.resume-timeline__item::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--resume-accent);
+  position: absolute;
+  left: -7px;
+  top: 0.4rem;
+  box-shadow: 0 0 0 6px var(--resume-marker-glow);
+}
+
+.resume-role {
+  font-weight: 600;
+}
+
+.resume-project {
+  font-size: 0.9rem;
+  color: var(--resume-muted);
+}
+
+.resume-project-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.resume-project-card {
+  border: 1px dashed var(--resume-border);
+  border-radius: 0.9rem;
+  padding: 1rem 1.25rem;
+  background: var(--resume-card-bg);
+  box-shadow: inset 0 0 0 1px rgba(8, 49, 39, 0.02);
+}
+
+.resume-project-card ul {
+  margin: 0.5rem 0 0.75rem;
+  padding-left: 1.1rem;
+}
+
+.resume-project-card ul li {
+  margin-bottom: 0.25rem;
+}
+
+.resume-project-card ul li:last-child {
+  margin-bottom: 0;
+}
+
+.resume-project-card__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 0.45rem;
+}
+
+.resume-project-card__name {
+  font-weight: 600;
+}
+
+.resume-project-card__period {
+  font-size: 0.85rem;
+  color: var(--resume-muted);
+}
+
+.resume-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resume-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed var(--resume-divider);
+  padding-bottom: 0.75rem;
+}
+
+.resume-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .resume-hero {
+    padding: 1.75rem;
+  }
+
+  .resume-hero__role {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+
+  .resume-timeline__item {
+    padding-left: 1rem;
+  }
+}
+`}</style>
