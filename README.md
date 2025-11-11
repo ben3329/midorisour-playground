@@ -1,41 +1,24 @@
-# Website
+# TODO
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+## blog
 
-## Installation
+### working with frontend 
+* fastapi filter 문제
+* ref-문제
+* datetime return 시 timezone 세팅
+* file response에서 content-disposition
 
-```bash
-yarn
-```
+### vs
+* first vs one_or_none
+* joinedload vs selectinload
+* cte vs subquery
 
-## Local Development
+## docs
 
-```bash
-yarn start
-```
+### python
+* release note
+* pydantic
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
-
-```bash
-yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
-
-```bash
-USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+### codex
+* mcp
+* prompt
