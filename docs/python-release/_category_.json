@@ -1,0 +1,8 @@
+{
+  "label": "What's New in Python?",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Python Release Note summaries for each version. See https://docs.python.org/3/whatsnew"
+  }
+}
