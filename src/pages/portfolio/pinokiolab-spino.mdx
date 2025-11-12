@@ -1,0 +1,78 @@
+---
+title: M사 척추/골반 지표 계산 프로그램
+description: X-Ray 사진을 스마트폰 카메라로 촬영하여 AI로 뼈 위치를 찾고 여러 지표를 계산해주는 App/Web
+wrapperClassName: portfolio-page
+hide_table_of_contents: true
+---
+
+import Heading from '@theme/Heading';
+import Link from '@docusaurus/Link';
+import PortfolioLayout from '@site/src/components/PortfolioLayout';
+
+<PortfolioLayout>
+  <Heading as="h1">M사 척추/골반 지표 계산 프로그램</Heading>
+
+  <p style={{marginTop: 8, opacity: 0.85}}>X-Ray 사진을 스마트폰 카메라로 촬영하여 AI를 통해 뼈 위치를 찾고 척추/골반 관련 지표를 계산해주는 프로그램입니다.</p>
+
+  ## 📝개요
+
+  - 목적: 기존에도 척추/골반 지표를 계산해주는 프로그램이 있었으나 수술실에서는 사용이 불가능하여 수술실에서 즉각적으로 해당 지표를 계산해주는 서비스 제공
+  - 주요 기능: 계정/권한 관리, 사용 히스토리 조회, 통계 조회, 사진 태깅, 투시 왜곡 보정(Front), 좌표 추정 및 계산(Front)
+  - 담당 역할: 팀장, Backend 개발
+  - 기간: 2025.01 ~ 2025.02, 2025.10 ~ 2025.11
+
+  ## 🛠️기술스택
+
+  - Backend: FastAPI (ASGI)
+  - Auth: OAuth2, Email
+  - DB: SQLModel + AsyncSession, Alembic, MySQL
+  - Storage: AWS S3
+  - Image/AI Model Serving: AWS CloudFront
+  - Image Overlay: OpenCV, Pillow
+  - Image Masking: AWS Textract
+  - Packaging/Deploy: Poetry, Docker, AWS ECS
+  - Linting: Black, Isort, Ruff
+
+  ## 🏗️Architecture
+
+  ### System Design
+  
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload#%7B%22pageId%22%3A%22IW8c-r90-Pk6t1E2gGuP%22%7D"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+
+  ### Service Flow
+
+  - 인증
+  <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
+    <iframe
+    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=dwvCzT2rjPbfZCiZXhEt&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        border: 0
+      }}
+      allowFullScreen
+    />
+  </div>
+
+  ## 💡Key Contributions
+
+  - 프로젝트 설계
+  - Backend 전반 개발
+</PortfolioLayout>
+
