@@ -1,4 +1,4 @@
----
+﻿---
 title: A사 외부 데이터 조회 시스템
 description: A사 외부 데이터 조회 시스템 포트폴리오
 wrapperClassName: portfolio-page
@@ -6,48 +6,44 @@ hide_table_of_contents: true
 ---
 
 import Heading from '@theme/Heading';
-import Link from '@docusaurus/Link';
 import PortfolioLayout from '@site/src/components/PortfolioLayout';
 
 <PortfolioLayout>
   <Heading as="h1">A사 외부 데이터 조회 시스템</Heading>
 
-  <p style={{marginTop: 8, opacity: 0.85}}> Pinokolab에서 서비스 중인 TIMS 시스템으로 수집된 데이터를 A사에서 조회할 수 있도록 개발한 시스템입니다.</p>
+  <p style={{marginTop: 8, opacity: 0.85}}>
+    PinokioLab에서 서비스하고 있는 TIMS 시스템(지재권 감정 지원 플랫폼)에 접근해 데이터를 조회할 수 있는 시스템을 구축했습니다. 
+    설계, 인증/권한, 데이터 조회, 증명서 발급, 공개 API 제공 등 백엔드 전반을 담당했습니다.
+    단순히 Web만 제공하는 것이 아니라 API도 제공해야 했고 고객사가 중국기업이라 내부적으로 해킹에 대한 우려가 많았던 프로젝트였습니다.
+  </p>
 
   ## 📝개요
 
-  - 목적: A사에서 Pinokiolab의 서비스 중 하나인 TIMS(지재권 감정 지원 플랫폼)의 데이터를 조회하기 위한 서비스 제공
-  - 주요 기능: 계정/권한 관리, TIMS 데이터 조회, 통계, 검사 보고서/인보이스/이미지 다운로드 제공, A사 개발용 공개 API 제공
-  - 담당 역할: 팀장, Backend 개발
+  - 목적: A사에서 TIMS의 감정/증명 데이터를 안전하게 조회·발급
+  - 주요 기능: 계정/권한 관리, TIMS 데이터 조회, 통계, 화물 사진/증명서 다운로드, 공개 API 제공
+  - 담당 역할: Backend 개발, 팀 리드
   - 기간: 2025.07 ~ 2025.10
 
   ## 🛠️기술스택
 
   - Backend: FastAPI (ASGI)
   - Auth: AWS Cognito
-  - Rate limiting: SlowAPI(AWS ElastiCache - Valkey)
+  - Rate limiting: SlowAPI (AWS ElastiCache - Valkey)
   - Cache: fastapi-cache (AWS ElastiCache - Valkey)
   - DB: SQLModel + AsyncSession, Alembic, MySQL
   - Storage: AWS S3
   - Image Serving: AWS CloudFront
-  - Packaging/Deploy: Poetry, Docker, AWS ECS
-  - Linting: Black, Isort, Ruff
+  - Packaging/Deployment: Poetry, Docker, AWS ECS
+  - Linting: Black, isort, Ruff
 
-  ## 🏗️Architecture
+  ## 🏗️아키텍처
 
   ### System Design
   
   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
     <iframe
-    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload#%7B%22pageId%22%3A%22IW8c-r90-Pk6t1E2gGuP%22%7D"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        border: 0
-      }}
+      src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload#%7B%22pageId%22%3A%22IW8c-r90-Pk6t1E2gGuP%22%7D"
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
       allowFullScreen
     />
   </div>
@@ -57,47 +53,26 @@ import PortfolioLayout from '@site/src/components/PortfolioLayout';
   - 인증
   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
     <iframe
-    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=dwvCzT2rjPbfZCiZXhEt&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        border: 0
-      }}
+      src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=dwvCzT2rjPbfZCiZXhEt&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
       allowFullScreen
     />
   </div>
-    
+  
   - 계정 생성
   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
     <iframe
-    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=sjwKsmKLNyCVRkISQtIr&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        border: 0
-      }}
+      src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=sjwKsmKLNyCVRkISQtIr&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
       allowFullScreen
     />
   </div>
 
-  - 데이터, 통계 조회 / 증명서 발급
+  - 데이터 조회 / 증명서 발급
   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
     <iframe
-    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=iRDKAXO0QV2kOKq7Bxqs&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        border: 0
-      }}
+      src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=iRDKAXO0QV2kOKq7Bxqs&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
       allowFullScreen
     />
   </div>
@@ -105,15 +80,8 @@ import PortfolioLayout from '@site/src/components/PortfolioLayout';
   - 사진 다운로드
   <div style={{ position: "relative", paddingBottom: "56.25%", height: 0 }}>
     <iframe
-    src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=H_xPDRhncyQwDVayX4LG&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        border: 0
-      }}
+      src="https://viewer.diagrams.net/?border=0&lightbox=1&highlight=0000ff&nav=1&title=a_architecture.drawio&page-id=H_xPDRhncyQwDVayX4LG&dark=auto#Uhttps%3A%2F%2Fdrive.google.com%2Fuc%3Fid%3D1rOBnaCwfxIbAcvIpYaWeSSIbzHZfpryc%26export%3Ddownload"
+      style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: 0 }}
       allowFullScreen
     />
   </div>
@@ -121,62 +89,46 @@ import PortfolioLayout from '@site/src/components/PortfolioLayout';
   ### Directory Structure
 ```bash
 .
-├── alembic.ini
 ├── app
-│   ├── api # API Endpoint 관련 코드
+│   ├── api
 │   │   ├── routers.py
 │   │   └── v1
 │   │       ├── endpoints
-│   │       │   └── ...
 │   │       └── routers.py
-│   ├── assets # image, docx 등 정적 파일
-│   │   └── ...
-│   ├── core # 다른 곳에서 사용할 공통 코드
+│   ├── assets
+│   ├── core
 │   │   ├── classes
-│   │   │   └── ...
 │   │   ├── constants
-│   │   │   └── ...
 │   │   ├── decorators
-│   │   │   └── ...
 │   │   ├── dependencies
-│   │   │   └── ...
 │   │   └── config.py
-│   ├── db # db 관련 코드
+│   ├── db
 │   │   ├── database.py
 │   │   ├── tables.py
 │   │   └── tims_views
-│   │       └── ...
-│   ├── filters # 데이터 조회 시 사용할 필터 모음
-│   │   └── ...
-│   ├── schemas # api, services에서 사용할 pydantic 모델 정의
-│   │   └── ...
-│   ├── services # 외부 서비스 연결, 여러 api가 공유할 수 있는 코드, 너무 긴 코드
-│   │   └── ...
+│   ├── filters
+│   ├── schemas
+│   ├── services
 │   ├── utils
-│   │   └── ...
 │   └── main.py
 ├── .env
 ├── docker-compose.yaml
 ├── dockerfile
 ├── migrations
-│   ├── ...
 │   └── versions
 │       └── 0000_init.py
 ├── poetry.lock
 ├── pyproject.toml
 ├── pytest.ini
 ├── ruff.toml
-├── tests
-│   ├── api
-│   │   └── v1
-│   │       └── endpoints
-│   │           └── ...
-│   └── conftest.py
-└── utils
-    └── create_revision.sh # alembic 새 버전 생성 스크립트
+└── tests
+    ├── api
+    │   └── v1
+    │       └── endpoints
+    └── conftest.py
 ```
 
-  ## 💡Key Contributions
+  ## 💡핵심 기여
 
   - 프로젝트 설계
     - 프로젝트 기본 디렉토리 구조 확립
