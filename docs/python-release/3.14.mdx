@@ -1,36 +1,104 @@
 ---
-title: What’s new in Python 3.14 
+title: What's new in Python 3.14
 sidebar_position: 100
 link: https://docs.python.org/3/whatsnew/3.14.html
 ---
 
 <ReleaseMeta date="2025-10-07"/>
 
-## <span style={{ color: 'red' }}>작성중...</span>
+## <span style={{ color: 'red' }}>아직 작성 중입니다.</span>
 
 ## Interpreter 향상
-### Deferred evaluation of annotations
 
-  * Multiple interpreters in the standard library
-  * Template strings
-  * Allow except and except* expressions without brackets
-  * Control flow in finally blocks
-  * Safe external debugger interface for CPython
-  * A new type of interpreter
-  * Free-threaded mode improvements
-  * Improved error messages
-  * Incremental garbage collection
-* Significant improvements in the standard library
-  * Zstandard support in the standard library
-  * Asyncio introspection capabilities
-  * Concurrent safe warnings control
-  * Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
-* C API improvements
-  * Python configuration C API
-* Platform support
-  * Emscripten is now an officially supported platform, at tier 3.
-* Release changes
-  * Free-threaded Python is officially supported
-  * PGP signatures have been discontinued for official releases
-  * Windows and macOS binary releases now support the experimental just-in-time compiler
-  * Binary releases for Android are now provided
+### Deferred evaluation of annotations
+이전까지 annotation은 선언 즉시 평가되어, 미정의 타입을 사용하면 에러가 났다.
+```Python
+>>> def func(arg:Undefined):
+...   pass
+... 
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'Undefined' is not defined
+>>> 
+```
+
+이 문제를 피하려고 문자열 형태로 감싸는 방식이 널리 쓰였다.
+```Python
+>>> def func(arg:"Undefined"):
+...   pass
+... 
+>>> class Undefined: 
+...   pass
+... 
+>>> 
+```
+
+3.14부터는 annotation이 지연 평가되어 문자열로 감싸는 꼼수가 불필요하다.
+```Python
+>>> def func(arg:Undefined):
+...   pass
+... 
+>>> 
+```
+
+이는 annotation 사용성 개선 및 성능 향상을 위해 도입되었다.
+이러한 변화로 인해 `annotationlib` 모듈이 추가되어, annotation을 기존과는 다른 방식으로 분석한다.
+분석 방식은 세 가지다.
+* `Format.VALUE`: 기존처럼 실제 값으로 평가한다. 미정의일 경우 NameError가 발생한다.
+* `Format.FORWARDREF`: 미정의된 annotation을 ForwardRef 객체로 대체한다.
+* `Format.STRING`: annotation을 문자열로 반환한다.
+
+사용 예시
+```Python
+>>> def func(arg:Undefined):
+...   pass
+... 
+>>> from annotationlib import get_annotations, Format
+>>> get_annotations(func, format=Format.VALUE)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+    get_annotations(func, format=Format.VALUE)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ben3329/.pyenv/versions/3.14.0/lib/python3.14/annotationlib.py", line 890, in get_annotations
+    ann = _get_dunder_annotations(obj)
+  File "/home/ben3329/.pyenv/versions/3.14.0/lib/python3.14/annotationlib.py", line 1059, in _get_dunder_annotations
+    ann = getattr(obj, "__annotations__", None)
+  File "<stdin>", line 1, in __annotate__
+    def func(arg:Undefined):
+                 ^^^^^^^^^
+NameError: name 'Undefined' is not defined
+>>> get_annotations(func, format=Format.FORWARDREF)
+{'arg': ForwardRef('Undefined', owner=<function func at 0x7081ed0a2a30>)}
+>>> get_annotations(func, format=Format.STRING)
+{'arg': 'Undefined'}
+>>> class Undefined:
+...   pass
+... 
+>>> get_annotations(func, format=Format.VALUE)
+{'arg': <class '__main__.Undefined'>}
+>>> 
+```
+
+### Multiple interpreters in the standard library
+### Template strings
+### Allow except and except* expressions without brackets
+### Control flow in finally blocks
+### Safe external debugger interface for CPython
+### A new type of interpreter
+### Free-threaded mode improvements
+### Improved error messages
+### Incremental garbage collection
+## Significant improvements in the standard library
+### Zstandard support in the standard library
+### Asyncio introspection capabilities
+### Concurrent safe warnings control
+### Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
+## C API improvements
+### Python configuration C API
+## Platform support
+### Emscripten is now an officially supported platform, at tier 3.
+## Release changes
+### Free-threaded Python is officially supported
+### PGP signatures have been discontinued for official releases
+### Windows and macOS binary releases now support the experimental just-in-time compiler
+### Binary releases for Android are now provided
