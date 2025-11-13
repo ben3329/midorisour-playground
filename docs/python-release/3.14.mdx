@@ -1,8 +1,10 @@
 ---
-title: What's new in Python 3.14
+title: Python 3.14
 sidebar_position: 100
 link: https://docs.python.org/3/whatsnew/3.14.html
 ---
+
+# What's new in Python 3.14
 
 <ReleaseMeta date="2025-10-07"/>
 
@@ -77,6 +79,40 @@ NameError: name 'Undefined' is not defined
 >>> get_annotations(func, format=Format.VALUE)
 {'arg': <class '__main__.Undefined'>}
 >>> 
+```
+아래 코드로 테스트를 해보면 성능이 얼마나 좋아졌는지 확인할 수 있다.
+```Python
+import time
+
+start = time.perf_counter()
+
+for i in range(1_000_000):
+    def func(x: list["UndefinedType"]):
+        return x
+
+end = time.perf_counter()
+
+print(f"Duration: {end - start:.4f} seconds")
+```
+
+실행 결과를 비교해보면 미미하지만 거의 2배 차이가 난다.
+* 3.14.0
+```bash
+ben3329@DESKTOP-F5GR6BH:~/test_3.14$ python test.py
+Duration: 0.1397 seconds
+ben3329@DESKTOP-F5GR6BH:~/test_3.14$ python test.py
+Duration: 0.1603 seconds
+ben3329@DESKTOP-F5GR6BH:~/test_3.14$ python test.py
+Duration: 0.1450 seconds
+```
+* 3.13.9
+```bash
+ben3329@DESKTOP-F5GR6BH:~/test_3.13$ python test.py
+Duration: 0.2872 seconds
+ben3329@DESKTOP-F5GR6BH:~/test_3.13$ python test.py
+Duration: 0.2970 seconds
+ben3329@DESKTOP-F5GR6BH:~/test_3.13$ python test.py
+Duration: 0.2938 seconds
 ```
 
 ### Multiple interpreters in the standard library

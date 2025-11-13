@@ -13,6 +13,10 @@
 * joinedload vs selectinload
 * cte vs subquery
 
+### 성능 측정
+* time.perf_counter
+* cProfile, pstats
+
 ## docs
 
 ### python
