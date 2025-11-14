@@ -21,7 +21,6 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 NameError: name 'Undefined' is not defined
->>> 
 ```
 
 이 문제를 피하려고 문자열 형태로 감싸는 방식이 널리 쓰였다.
@@ -78,7 +77,6 @@ NameError: name 'Undefined' is not defined
 ... 
 >>> get_annotations(func, format=Format.VALUE)
 {'arg': <class '__main__.Undefined'>}
->>> 
 ```
 아래 코드로 테스트를 해보면 성능이 얼마나 좋아졌는지 확인할 수 있다.
 ```Python
@@ -116,14 +114,131 @@ Duration: 0.2938 seconds
 ```
 
 ### Multiple interpreters in the standard library
+
+기존에 CPython은 하나의 프로세스 안에서 여러 인터프리터를 실행할 수 있는 C 확장 기능을 제공해왔다.
+이 기능은 C-API를 통해서만 사용이 가능해서 Python 코드만으로는 사용이 불가능했다.
+이번 릴리즈에서 concurrent.interpreters 모듈이 추가 되면서 해당 기능을 사용할 수 있게 되었다.
+
+동시성을 구현하기 위해서는 보통 threading 모델을 사용하는데 이는 구현 및 유지보수가 어려웠다.
+하지만 이제 이 모듈이 추가되어 Communicating Sequential Processes (CSP), Actor Model 같은 동시성 모델을 적용할 수 있게 되었다.
+
+* CSP: 공유 메모리를 직접 수정하는 대신, 채널을 통해 상태 변경 내용을 전달하여 각 프로세스가 자신만의 상태를 안전하게 업데이트하도록 하는 모델
+  * `Channel1, Process1{LocalState1, Channel1}, Process2{LocalState2, Channel1}`
+* Actor Model: 공유 상태 없이 각 액터가 독립 상태를 관리하고, 메시지를 통해서만 상태 변경이나 통신을 비동기적으로 수행하는 동시성 모델
+  * `Actor1{State1, Mailbox1}, Actor2{State2, Mailbox2}`
+
+multiple interpreters와 multiprocessing은 서로 격리된 논리적 프로세스를 사용하고, 메모리 공유가 없다는 점에서 유사하다.
+하지만 더 적은 시스템 리소스를 사용하고 더 효율적으로 동작한다.
+바꿔말하면 multiprocessing의 격리성과 multithreading의 효율성을 동시에 갖춘 모델이라고 할 수 있다.
+
+멋진 기능이지만 아직 몇 가지 제약 사항이 있다.
+* 인터프리터 시작 속도가 아직 최적화 되지 않음
+* 인터프리터당 메모리 사용량이 필요 이상으로 큼
+* memoryview를 제외하면 실질적인 객체/데이터 공유 옵션이 부족
+* 많은 PyPI third-party 라이브러리들이 현재 multiple interpreters를 지원하지 않음
+* Python 사용자에게 익숙하지 않은 프로그래밍 방식
+  * exec 메서드를 사용해 문자열 형태로 코드를 넣어줘야 한다.
+    ```Python
+    interp.exec(
+        """
+      while True:
+          task = tasks.get()
+          if task is None:
+              results.put(("stopped", None))
+              break
+
+          n = task
+          results.put(("result", (n, n * n)))
+        """
+    )
+    ```
+  * call 메서드가 있긴 하지만 blocking이어서 메인 스레드에 영향이 간다. 스레드를 별도로 생성하는 방법도 있지만, 그러면 라이프사이클 관리를 메인 스레드에서 해야 한다.
+
 ### Template strings
+
+Template strings는 custom 문자열 처리를 위한 새로운 메커니즘이다.
+f-strings와 유사하지만, str 객체를 반환하지 않고 문자열의 정적 부분과 보간 부분을 나타내는 객체를 반환한다.
+
+t-string 사용법은 단순히 f-string에서 f 접두사를 t로 바꾸면 된다.
+```Python
+>>> var = 52
+>>> template = t"Value is {var}"
+>>> template
+Template(strings=('Value is ', ''), interpolations=(Interpolation(52, 'var', None, ''),))
+```
+
+이터레이션을 통해 Template 객체의 정적 부분과 중괄호로 감싸진 보간 부분에 순서대로 접근할 수 있다.
+```Python
+>>> list(template)
+['Value is ', Interpolation(52, 'var', None, '')]
+```
+
+t-string이 도입되면 개발자는 사용자 입력을 안전하게 처리하는 시스템을 만들 수 있다. 아래는 그 예시다.
+* sanitise SQL
+* 안전한 셸 명령 생성
+* 개선된 로깅
+* HTML/CSS 등 최신 웹 개발 아이디어 반영
+* 경량화된 맞춤형 비즈니스 DSL(Domain-Specific Language) 구현
+
 ### Allow except and except* expressions without brackets
+
+`except`와 `except*` 표현식에서 여러 개의 예외 타입을 사용할 때 `as` 절을 사용하지 않는 경우 괄호를 생략할 수 있다.
+
+```Python
+try:
+    connect_to_server()
+except TimeoutError, ConnectionRefusedError:
+    print('The network has ceased to be!')
+```
+
 ### Control flow in finally blocks
+
+이제 `return`, `break`, `continue`가 `finally` 블록 내 사용될 때 SyntaxWarning이 발생한다.
+```Python
+>>> def func():
+...       try:
+...         return 1
+...       finally:
+...         return 2
+... 
+<stdin-4>:5: SyntaxWarning: 'return' in a 'finally' block
+```
+
 ### Safe external debugger interface for CPython
+
+실행 중인 Python 프로세스에 중단하거나 재시작 없이 안전하게 디버거·프로파일러를 연결할 수 있는 '제로 오버헤드 디버깅 인터페이스'가 도입되었다.
+이 인터페이스는 런타임에 인터프리터 실행 경로 수정 등 어떠한 오버헤드도 발생시키지 않는다.
+그리고 기존에는 운영체제의 디버깅 기능인 ptrace를 이용해 프로세스의 메모리 등을 조작해 디버거를 붙였지만, 이제 이렇게 하지 않아도 된다.
+덕분에 디버그 툴들은 Python 애플리케이션과 실시간으로 안전하게 상호작용할 수 있게 되었다.
+
+편의를 위해 이 인터페이스는 `sys.remote_exec()`에 구현되었다.
+```Python
+import sys
+import os
+from tempfile import NamedTemporaryFile
+
+with NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    script_path = f.name
+    f.write(f'import my_debugger; my_debugger.connect({os.getpid()})')
+
+# Execute in process with PID 1234
+print('Behold! An offering:')
+sys.remote_exec(1234, script_path)
+```
+sys.remote_exec(pid, script)는 다음 안전 실행 지점에서 타깃 프로세스가 지정된 Python 코드를 실행하도록 보내는 기능이다. 
+도구 제작자(tool authors)는 필요하다면 PEP에 명시된 프로토콜을 참고하여 직접 인터페이스를 구현할 수도 있다. 
+
+보안이 매우 중요하기 때문에, 해당 인터페이스를 비활성화하는 안전한 접근 제어 장치도 포함되어 있다:
+* `PYTHON_DISABLE_REMOTE_DEBUG`: 환경 변수
+* `-X disable-remote-debug`: 명령줄 옵션
+* `--without-remote-debug`: 빌드 시 기능을 완전히 비활성화하는 옵션
+이를 통해 운영 환경에서 원치 않는 디버깅 접근을 차단할 수 있다.
+
 ### A new type of interpreter
 ### Free-threaded mode improvements
 ### Improved error messages
 ### Incremental garbage collection
+
 ## Significant improvements in the standard library
 ### Zstandard support in the standard library
 ### Asyncio introspection capabilities
