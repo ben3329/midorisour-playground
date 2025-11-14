@@ -116,6 +116,49 @@ Duration: 0.2938 seconds
 ```
 
 ### Multiple interpreters in the standard library
+
+기존에 CPython은 하나의 프로세스 안에서 여러 인터프리터를 실행할 수 있는 C 확장 기능을 제공해왔다.
+이 기능은 C-API를 통해서만 사용이 가능해서 Python 코드만으로는 사용이 불가능했다.
+이번 릴리즈에서 concurrent.interpreters 모듈이 추가 되면서 해당 기능을 사용할 수 있게 되었다.
+
+동시성을 구현하기 위해서는 보통 threading 모델을 사용하는데 이는 구현 및 유지보수가 어려웠다.
+하지만 이제 이 모듈이 추가 되어 Communicating Sequential Processes (CSP), Actor Model 같은 동시성 모델을 적용할 수 있게 되었다.
+
+* CSP: 공유 메모리를 직접 수정하는 대신, 채널을 통해 상태 변경 내용을 전달하여 각 프로세스가 자신만의 상태를 안전하게 업데이트하도록 하는 모델
+  * `Channel1, Process1{LocalSate1, Channel1}, Processes2{LocalSate2, Channel1}`
+* Actor Model: 공유 상태 없이 각 액터가 독립 상태를 관리하고, 메시지를 통해서만 상태 변경이나 통신을 비동기적으로 수행하는 동시성 모델
+  * `Actor1{State1, MailBox1}, Actor2{State2, MailBox2}`
+
+muliple interpreters와 multiprocessing는 서로 격리된 논리적 프로세스를 사용하고, 메모리 공유가 없다는 점에서 유사하다.
+하지만 더 적은 시스템 리소스를 사용하고 더 효율적으로 동작한다.
+바꿔말하면 multiprocessing의 격리성과 multithreading의 효율성을 동시에 갖춘 모델이라고 할 수 있다.
+
+멋진 기능이지만 아직 몇가지 제약 사항이 있다.
+* 인터프리터 시작 속도가 아직 최적화 되지 않음
+* 인터프리터 당 메모리 사용량이 필요 이상으로 큼
+* memoryview를 제외하면 실질적인 객체/데이터 공유 옵션이 부족
+* 많은 PyPI third-party 라이브러리들이 현재 muliple interpreters를 지원하지 않음
+* Python 사용자에게 익숙하지 않은 프로그래밍 방식
+  * exec 메서드를 사용해 문자열 형태로 코드를 넣어줘야 한다.
+    ```Python
+    interp.exec(
+        """
+      while True:
+          task = tasks.get()
+          if task is None:
+              # 종료 신호 (sentinel)
+              results.put(("stopped", None))
+              break
+
+          # 여기서가 실제 "일"을 하는 부분
+          # 예시: 숫자를 제곱해서 돌려보내기
+          n = task
+          results.put(("result", (n, n * n)))
+        """
+    )
+    ```
+  * call 메서드가 있긴하지만 blocking이라 메인스레드에 영향이 간다. 스레드를 별도로 파는 방법도 있지만 그러면 라이프사이클 관리를 메인 스레드에서 해야한다.
+
 ### Template strings
 ### Allow except and except* expressions without brackets
 ### Control flow in finally blocks
