@@ -3,6 +3,8 @@
 ## blog
 
 ### working with frontend 
+* union 추가
+   * value: int | float
 * fastapi filter 문제
 * ref-문제
 * datetime return 시 timezone 세팅
