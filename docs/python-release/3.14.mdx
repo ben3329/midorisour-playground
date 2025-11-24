@@ -8,8 +8,6 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 
 <ReleaseMeta date="2025-10-07"/>
 
-## <span style={{ color: 'red' }}>아직 작성 중입니다.</span>
-
 ## Interpreter 향상
 
 ### Deferred evaluation of annotations
@@ -258,7 +256,7 @@ void opcode_X(...) {
 참고로 이는 Python 함수의 테일 콜 최적화(tail call optimization)와는 혼동해서는 안 된다. CPython에서는 함수 단위의 테일 콜 최적화는 아직 구현되어 있지 않다.
 
 최신 컴파일러를 사용하는 경우, 이 방식은 상당한 성능 향상을 제공한다.
-초기 벤치마크에 따르면 표준 pyperformance 벤치마크에서 기하 평균 3–5% 정도 더 빠른 성능을 보여준다.
+초기 벤치마크에 따르면 표준 pyperformance 벤치마크에서 기하 평균 3-5% 정도 더 빠른 성능을 보여준다.
 비교 기준은 이 새로운 인터프리터를 사용하지 않은, Clang 19로 빌드한 Python 3.14이다.
 
 현재 이 인터프리터는 Clang 19 이상, x86-64 및 AArch64 아키텍처에서만 동작한다. 하지만 향후 GCC에서도 이를 지원할 예정이다.
@@ -267,11 +265,247 @@ void opcode_X(...) {
 자세한 내용은 --with-tail-call-interp 옵션을 참고하면 된다.
 
 ### Free-threaded mode improvements
+
+CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에서 큰 폭으로 개선되었다.
+
+* PEP 703에서 설명된 구현이 모두 완료되었으며, C API 변경도 마무리되었고, 인터프리터 내부의 임시 우회 코드들도 영구적인 해결 방식으로 대체되었다.
+* 전문화 및 적응형 인터프리터(PEP 659) 가 Free-threaded mode에서 활성화되었으며, 여러 최적화와 함께 성능을 크게 향상시킨다.
+  현재 Free-threaded 모드에서의 단일 스레드 코드 실행 속도 저하는 플랫폼과 컴파일러에 따라 약 5-10% 수준으로 줄어들었다.
+* Windows에서 Free-threaded 모드를 사용하는 C 확장 모듈을 빌드할 때, 더이상 C 컴파일러가 자동으로 판단하지 않기 때문에 `Py_GIL_DISABLED` 전처리 변수를 정의해야 한다.
+  인터프리터에서 이 모드를 사용 했는 지 확인하려면 `sysconfig.get_config_var()`를 사용하면 된다.
+* 인터프리터 실행 시 몇가지 옵션이 추가 되었다. 
+  * `-X context_aware_warnings`: 이 플래그는 동시성 안전 Warnings 컨트롤 기능을 활성화할지 여부를 제어한다.
+    Free-threaded 빌드에서는 기본값이 `true`, 기존 빌드에서는 `false`다.
+  * `-X thread_inherit_context`: 활성화 시 `threading.Tread`로 생성된 스레드가 호출자의 `Context()`를 복사하여 시작한다.
+    이렇게 될 경우 `catch_warnings`로 설정된 경고 필터링 컨텍스트가 스레드에 "상속"된다.
+    또한 decimal 컨텍스트 매니저 등 context variables를 사용하는 다른 모듈에도 영향을 미친다.
+    Free-threaded 빌드에서는 기본값이 `true`, 기존 빌드에서는 `false`다.
+
 ### Improved error messages
+
+에러 메시지가 개선되었다. 전반적으로 SyntaxError 메시지가 
+
+* 키워드 오타를 감지할 경우 올바른 키워드 제안
+  * 기존
+    ```Python
+    >>> whille True:
+    File "<python-input-0>", line 1
+      whille True:
+             ^^^^
+    SyntaxError: invalid syntax
+    >>> 
+    ```
+  * 변경 후
+    ```Python
+    >>> whille True:
+      File "<python-input-1>", line 1
+        whille True:
+        ^^^^^^
+    SyntaxError: invalid syntax. Did you mean 'while'?
+    >>> 
+    ```
+* `else` 다음에 `elif`가 올 경우 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> if True:
+    ...     pass
+    ... else:
+    ...     pass
+    ... elif:
+    ...     pass
+    ...     
+      File "<python-input-1>", line 5
+        elif:
+        ^^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> if True:
+    ...     pass
+    ... else:
+    ...     pass
+    ... elif:
+    ...     pass
+    ...     
+      File "<python-input-1>", line 5
+        elif:
+        ^^^^
+    SyntaxError: 'elif' block follows an 'else' block
+    ```
+* Conditional expressions에서 else 뒤에 statement가 올 경우, 또는 if 앞에 pass, break, continue 중 하나가 올 경우 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> 1 if True else pass
+      File "<python-input-2>", line 1
+        1 if True else pass
+                       ^^^^
+    SyntaxError: invalid syntax
+    >>> pass if True else 1
+      File "<python-input-3>", line 1
+        pass if True else 1
+             ^^
+    SyntaxError: invalid syntax
+    
+    ```
+  * 변경 후
+    ```Python
+    >>> 1 if True else pass
+      File "<python-input-2>", line 1
+        1 if True else pass
+                       ^^^^
+      SyntaxError: expected expression after 'else', but statement is given
+    >>> pass if True else 1
+      File "<python-input-3>", line 1
+        pass if True else 1
+        ^^^^
+    SyntaxError: expected expression before 'if', but statement is given
+    ``` 
+* 문자열이 잘못 닫힌 경우 메시지 개선
+  * 기존
+    ```Python
+    >>> "abc "d" efg"
+      File "<python-input-7>", line 1
+        "abc "d" efg"
+              ^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> "abc "d" efg"
+      File "<python-input-4>", line 1
+        "abc "d" efg"
+              ^
+    SyntaxError: invalid syntax. Is this intended to be part of the string?
+    ```
+* 문자열 prefix 충돌 시 더 명확한 오류 메시지
+  * 기존
+    ```Python
+    >>> ub'abc'
+      File "<python-input-0>", line 1
+        ub'abc'
+          ^^^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> ub'abc'
+      File "<python-input-0>", line 1
+        ub'abc'
+        ^^
+    SyntaxError: 'u' and 'b' prefixes are incompatible
+    ```
+* `as` 구문에서 호환되지 않는 대상 사용 시 오류 메시지 개선
+  * 기존
+    ```Python
+    >>> import datetime as ...
+      File "<python-input-8>", line 1
+        import datetime as ...
+                           ^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> import datetime as ...
+      File "<python-input-17>", line 1
+        import datetime as ...
+                           ^^^
+    SyntaxError: cannot use ellipsis as import target
+    ```
+* unhashable 타입을 dict/set에 사용하는 경우의 메시지 개선
+  * 기존
+    ```Python
+    >>> s = set()
+    >>> s.add({'key':123})
+    Traceback (most recent call last):
+      File "<python-input-10>", line 1, in <module>
+        s.add({'key':123})
+        ~~~~~^^^^^^^^^^^^^
+    TypeError: unhashable type: 'dict'
+    ```
+  * 변경 후
+    ```Python
+    >>> s = set()
+    >>> s.add({'key':123})
+    Traceback (most recent call last):
+      File "<python-input-19>", line 1, in <module>
+        s.add({'key':123})
+        ~~~~~^^^^^^^^^^^^^
+    TypeError: cannot use 'dict' as a set element (unhashable type: 'dict')
+    ```
+* with / async with 혼동 시 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> class AsyncCM:
+    ...         async def __aenter__(self):
+    ...                 pass
+    ...         async def __aexit__(self, exc_type, exc_val, exc_tb):
+    ...                 pass
+    ...                 
+    >>> with AsyncCM():
+    ...         pass
+    ...         
+    Traceback (most recent call last):
+      File "<python-input-24>", line 1, in <module>
+        with AsyncCM():
+             ~~~~~~~^^
+    TypeError: 'AsyncCM' object does not support the context manager protocol
+    ```
+  * 변경 후
+    ```Python
+    >>> class AsyncCM:
+    ...         async def __aenter__(self):
+    ...                 pass
+    ...         async def __aexit__(self, exc_type, exc_val, exc_tb):
+    ...                 pass
+    ...                 
+    >>> with AsyncCM():
+    ...         pass
+    ...         
+    Traceback (most recent call last):
+      File "<python-input-24>", line 1, in <module>
+        with AsyncCM():
+             ~~~~~~~^^
+    TypeError: 'AsyncCM' object does not support the context manager protocol (missed __exit__ method) but it supports the asynchronous context manager protocol. Did you mean to use 'async with'?
+    ```
+
 ### Incremental garbage collection
 
+* Cycle GC가 점진적(incremental) 방식으로 동작하도록 변경되었다.
+  * 큰 힙에서 최대 일시 중지 시간이 10배 이상 줄어든다.
+* 기존에는 GC가 3세대였지만, 이제는 2세대(young, old)로 변경되었다.
+  * python GC는 객체가 오래 살아 남을수록 높은 세대로 승격시켜 높은 세대일수록 덜 수집하는 방식을 사용한다.
+  * 이 세대 구분이 2세대로 단순화되었다.
+  * gc.collect()가 직접 호출되지 않는 경우, GC가 약간 덜 자주 호출된다.
+  * 호출될 때는 하나 이상의 세대를 수집하는 대신, young 세대와 old 세대의 일부를 수집한다.
+  * gc.collect()의 동작이 약간 변경되었다.
+    * gc.collect(1): 이제 1세대를 수집하는 대신, 점진적 수집을 수행한다.
+    * 그 외의 gc.collect() 호출은 변경되지 않았다.
+
+
 ## Significant improvements in the standard library
+
 ### Zstandard support in the standard library
+
+* lzma, bz2, gzip, zlib 모듈을 re-export하는 compression 패키지가 추가되었다.
+  * compression.lzma, compression.bz2, compression.gzip, compression.zlib
+  * 기존 모듈 이름은 더이상 권장되지 않지만, 아직 폐기되지는 않았다.
+  * 기존 모듈이 폐기되거나 제거되는 시점은 3.14 릴리즈 후 최소 5년 이후가 될 것이다.
+* compression.zstd 모듈이 추가되었다.
+  * Meta의 zstd 라이브러리 바인딩을 통해 Zstandard 포맷의 압축 및 해제를 지원합니다.
+  * Zstandard는 널리 채택된, 매우 효율적이고 빠른 압축 포맷이다.
+  * compression.zstd 모듈에 도입된 API 외에도, tarfile, zipfile, shutil 모듈에서 Zstandard 압축 아카이브를 읽고 쓸 수 있는 기능이 추가되었다.
+* 사용 예시
+```Python
+from compression import zstd
+import math
+
+data = str(math.pi).encode() * 20
+compressed = zstd.compress(data)
+ratio = len(compressed) / len(data)
+print(f"Achieved compression ratio of {ratio}")
+```
+
 ### Asyncio introspection capabilities
 ### Concurrent safe warnings control
 ### Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
