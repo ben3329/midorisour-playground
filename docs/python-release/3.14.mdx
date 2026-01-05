@@ -10,7 +10,7 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 
 ## Interpreter 향상
 
-### Deferred evaluation of annotations
+### annotations 지연 평가
 이전까지 annotation은 선언 즉시 평가되어, 미정의 타입을 사용하면 에러가 났다.
 ```Python
 >>> def func(arg:Undefined):
@@ -111,7 +111,7 @@ ben3329@DESKTOP-F5GR6BH:~/test_3.13$ python test.py
 Duration: 0.2938 seconds
 ```
 
-### Multiple interpreters in the standard library
+### standard library에서 다중 인터프리터 지원
 
 기존에 CPython은 하나의 프로세스 안에서 여러 인터프리터를 실행할 수 있는 C 확장 기능을 제공해왔다.
 이 기능은 C-API를 통해서만 사용이 가능해서 Python 코드만으로는 사용이 불가능했다.
@@ -178,7 +178,7 @@ t-string이 도입되면 개발자는 사용자 입력을 안전하게 처리하
 * HTML/CSS 등 최신 웹 개발 아이디어 반영
 * 경량화된 맞춤형 비즈니스 DSL(Domain-Specific Language) 구현
 
-### Allow except and except* expressions without brackets
+### except와 except* 표현식에서 괄호 없이 사용 가능
 
 `except`와 `except*` 표현식에서 여러 개의 예외 타입을 사용할 때 `as` 절을 사용하지 않는 경우 괄호를 생략할 수 있다.
 
@@ -189,7 +189,7 @@ except TimeoutError, ConnectionRefusedError:
     print('The network has ceased to be!')
 ```
 
-### Control flow in finally blocks
+### finally blocks에서 제어 흐름 사용 시 SyntaxWarning 발생
 
 이제 `return`, `break`, `continue`가 `finally` 블록 내 사용될 때 SyntaxWarning이 발생한다.
 ```Python
@@ -202,7 +202,7 @@ except TimeoutError, ConnectionRefusedError:
 <stdin-4>:5: SyntaxWarning: 'return' in a 'finally' block
 ```
 
-### Safe external debugger interface for CPython
+### CPython용 안전한 외부 디버거 인터페이스
 
 실행 중인 Python 프로세스에 중단하거나 재시작 없이 안전하게 디버거·프로파일러를 연결할 수 있는 '제로 오버헤드 디버깅 인터페이스'가 도입되었다.
 이 인터페이스는 런타임에 인터프리터 실행 경로 수정 등 어떠한 오버헤드도 발생시키지 않는다.
@@ -232,7 +232,7 @@ sys.remote_exec(pid, script)는 다음 안전 실행 지점에서 타깃 프로�
 * `--without-remote-debug`: 빌드 시 기능을 완전히 비활성화하는 옵션
 이를 통해 운영 환경에서 원치 않는 디버깅 접근을 차단할 수 있다.
 
-### A new type of interpreter
+### 새로운 타입의 인터프리터
 
 CPython에 새로운 유형의 인터프리터가 추가되었다.
 이 인터프리터는 하나의 거대한 C `switch-case` 문을 사용하는 대신, 개별 Python 바이트코드를 구현하는 작은 C 함수들 사이를 tail call 방식으로 전환하며 동작한다.
@@ -264,7 +264,7 @@ void opcode_X(...) {
 또한 PGO(Profile-Guided Optimization) 를 활성화하는 것이 강력히 권장되는데, 이는 해당 인터프리터에서 성능 향상이 검증된 유일한 구성 방식이기 때문이다.
 자세한 내용은 --with-tail-call-interp 옵션을 참고하면 된다.
 
-### Free-threaded mode improvements
+### Free-threaded mode 향상
 
 CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에서 큰 폭으로 개선되었다.
 
@@ -281,7 +281,7 @@ CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에
     또한 decimal 컨텍스트 매니저 등 context variables를 사용하는 다른 모듈에도 영향을 미친다.
     Free-threaded 빌드에서는 기본값이 `true`, 기존 빌드에서는 `false`다.
 
-### Improved error messages
+### error message 개선
 
 에러 메시지가 개선되었다. 전반적으로 SyntaxError 메시지가 
 
@@ -469,7 +469,7 @@ CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에
     TypeError: 'AsyncCM' object does not support the context manager protocol (missed __exit__ method) but it supports the asynchronous context manager protocol. Did you mean to use 'async with'?
     ```
 
-### Incremental garbage collection
+### 점진적 가비지 컬렉션
 
 * Cycle GC가 점진적(incremental) 방식으로 동작하도록 변경되었다.
   * 큰 힙에서 최대 일시 중지 시간이 10배 이상 줄어든다.
@@ -485,7 +485,7 @@ CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에
 
 ## Significant improvements in the standard library
 
-### Zstandard support in the standard library
+### standard library에서 Zstandard 압축 지원
 
 * lzma, bz2, gzip, zlib 모듈을 re-export하는 compression 패키지가 추가되었다.
   * compression.lzma, compression.bz2, compression.gzip, compression.zlib
@@ -506,7 +506,58 @@ ratio = len(compressed) / len(data)
 print(f"Achieved compression ratio of {ratio}")
 ```
 
-### Asyncio introspection capabilities
+### asyncio의 내부 상태 조회(인트로스펙션) 기능
+
+* 비동기 작업을 사용하는 Python 프로세스를 검사하기 위한 명령어가 추가되었다.
+* `python -m asyncio ps PID` 또는 `python -m asyncio pstree PID` 명령어로 사용할 수 있다.
+* `ps` 서브커맨드는 주어진 프로세스 ID(PID)를 검사하고 현재 실행 중인 asyncio 작업에 대한 정보를 표시한다.
+  작업 테이블을 출력하는데, 여기에는 모든 작업, 작업 이름, 코루틴 스택, 그리고 어떤 작업이 대기 중인지가 포함된다.
+```bash
+python -m asyncio ps 12345
+
+tid        task id              task name            coroutine stack                                    awaiter chain                                      awaiter name    awaiter id
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1935500    0x7fc930c18050       Task-1               TaskGroup._aexit -> TaskGroup.__aexit__ -> main                                                                       0x0
+1935500    0x7fc930c18230       Sundowning           TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TaskGroup._aexit -> TaskGroup.__aexit__ -> main    Task-1          0x7fc930c18050
+1935500    0x7fc93173fa50       TMBTE                TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TaskGroup._aexit -> TaskGroup.__aexit__ -> main    Task-1          0x7fc930c18050
+1935500    0x7fc93173fdf0       TNDNBTG              sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   Sundowning      0x7fc930c18230
+1935500    0x7fc930d32510       Levitate             sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   Sundowning      0x7fc930c18230
+1935500    0x7fc930d32890       DYWTYLM              sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TMBTE           0x7fc93173fa50
+1935500    0x7fc93161ec30       Aqua Regia           sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TMBTE           0x7fc93173fa50
+```
+* `pstree` 서브커맨드는 동일한 정보를 가져오지만, 시각적인 비동기 호출 트리를 렌더링하여 코루틴 관계를 계층적 형식으로 보여준다.
+  이 명령어는 장기 실행 중이거나 stuck된 비동기 프로그램을 디버깅하는 데 특히 유용하다.
+  프로그램이 어디에서 차단되었는지, 어떤 작업이 보류 중인지, 코루틴이 어떻게 연결되어 있는지를 빠르게 식별하는 데 도움이 될 수 있다.
+  만약 async await 그래프에서 사이클이 감지되면, 도구는 오류를 발생시키고 트리 구성을 방해하는 사이클 경로를 나열한다.
+```bash
+python -m asyncio pstree 12345
+
+└── (T) Task-1
+    └──  main example.py:13
+        └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+            └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                ├── (T) Sundowning
+                │   └──  album example.py:8
+                │       └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+                │           └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                │               ├── (T) TNDNBTG
+                │               │   └──  play example.py:4
+                │               │       └──  sleep Lib/asyncio/tasks.py:702
+                │               └── (T) Levitate
+                │                   └──  play example.py:4
+                │                       └──  sleep Lib/asyncio/tasks.py:702
+                └── (T) TMBTE
+                    └──  album example.py:8
+                        └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+                            └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                                ├── (T) DYWTYLM
+                                │   └──  play example.py:4
+                                │       └──  sleep Lib/asyncio/tasks.py:702
+                                └── (T) Aqua Regia
+                                    └──  play example.py:4
+                                        └──  sleep Lib/asyncio/tasks.py:702
+```
+
 ### Concurrent safe warnings control
 ### Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
 ## C API improvements
