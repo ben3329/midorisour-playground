@@ -559,7 +559,30 @@ python -m asyncio pstree 12345
 ```
 
 ### Concurrent safe warnings control
-### Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
+
+* `context_aware_warnings` 플래그가 추가되었다. 
+* `warnings.catch_warnings` context manager에서 이 플래그가 활성화되면, 경고 필터링이 현재 컨텍스트 변수에 저장된다. 
+  따라서 여러 스레드나 비동기 작업에서 `catch_warnings`를 사용할 때 예측 가능한 경고 제어가 가능해진다.
+* 기존에는 `catch_warnings`가 전역 경고 필터링 상태를 수정했기 때문에, 동시성 환경에서 사용 시 의도치 않은 상호작용이 발생할 수 있었다.
+  이제 이 플래그를 활성화하면 각 스레드나 비동기 작업이 독립적인 경고 필터링 컨텍스트를 가질 수 있다.
+```Python
+import warnings
+# Thread A
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    do_something()
+# Thread B
+do_other_thing()  # ← Thread A의 경고 설정 영향 ❌
+```
+* 이 플래그는 -X 명령줄 옵션이나 환경 변수를 통해 설정할 수 있다. 
+  기본값은 free-threaded 빌드에서는 true, GIL이 활성화된 빌드에서는 false다.
+
+### Default Interactive Shell
+* 기본 interactive shell에서 syntax highlighting이 지원된다. 
+  기본적으로 활성화 되어 있으며 `PYTHON_BASIC_REPL` 환경 변수가 설정되어 있거나 색상을 비활성화하는 다른 환경 변수가 설정되어 있으면 비활성화 된다.
+  interactive shell이나 `PYTHONSTARTUP` 스크립트에서 `_colorize.set_theme()`을 호출하여 색상 테마를 변경할 수 있다.
+* 기본 interactive shell에서 import 자동 완성이 지원된다.
+
 ## C API improvements
 ### Python configuration C API
 ## Platform support
