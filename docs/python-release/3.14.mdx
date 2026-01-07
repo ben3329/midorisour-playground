@@ -8,7 +8,7 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 
 <ReleaseMeta date="2025-10-07"/>
 
-## Interpreter 향상
+## Interpreter 개선
 
 ### annotations 지연 평가
 이전까지 annotation은 선언 즉시 평가되어, 미정의 타입을 사용하면 에러가 났다.
@@ -264,7 +264,7 @@ void opcode_X(...) {
 또한 PGO(Profile-Guided Optimization) 를 활성화하는 것이 강력히 권장되는데, 이는 해당 인터프리터에서 성능 향상이 검증된 유일한 구성 방식이기 때문이다.
 자세한 내용은 --with-tail-call-interp 옵션을 참고하면 된다.
 
-### Free-threaded mode 향상
+### Free-threaded mode 개선
 
 CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에서 큰 폭으로 개선되었다.
 
@@ -483,7 +483,7 @@ CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에
     * 그 외의 gc.collect() 호출은 변경되지 않았다.
 
 
-## Significant improvements in the standard library
+## 표준 라이브러리의 주요 개선 사항
 
 ### standard library에서 Zstandard 압축 지원
 
@@ -506,7 +506,7 @@ ratio = len(compressed) / len(data)
 print(f"Achieved compression ratio of {ratio}")
 ```
 
-### asyncio의 내부 상태 조회(인트로스펙션) 기능
+### asyncio의 내부 상태 조회 기능
 
 * 비동기 작업을 사용하는 Python 프로세스를 검사하기 위한 명령어가 추가되었다.
 * `python -m asyncio ps PID` 또는 `python -m asyncio pstree PID` 명령어로 사용할 수 있다.
@@ -583,9 +583,19 @@ do_other_thing()  # ← Thread A의 경고 설정 영향 ❌
   interactive shell이나 `PYTHONSTARTUP` 스크립트에서 `_colorize.set_theme()`을 호출하여 색상 테마를 변경할 수 있다.
 * 기본 interactive shell에서 import 자동 완성이 지원된다.
 
-## C API improvements
+## C API 개선
 ### Python configuration C API
-## Platform support
+* Python 초기화를 구성하는 모든 방법을 하나로 통합했다.
+  또한 Python의 preinitialization과 initialization 설정을 단일 API로 통합했다.
+  더 나아가, API를 단순화하기 위해 두 가지 선택지('Python'과 'Isolated') 대신 단 하나의 Python 임베딩 방식만을 제공한다. 
+  * `PyInitConfig`: Python 초기화 구성. C 구조체에 의존하지 않고, 향후 ABI(Application Binary Interface) 호환성을 유지한 변경 가능
+  * `PyInitConfig_AddModule()`: 내장 확장 모듈을 추가. inittab과 같음 
+  * `PyConfig_Get()`: 현재 런타임 구성을 가져오는 함수
+  * `PyConfig_Set()`: 런타임 구성을 설정하는 함수
+* 의도적으로 CPython 구현 세부사항과 더 강하게 결합된 사용 사례(예: CPython CLI의 전체 기능과 그 구성 메커니즘을 에뮬레이션하는 경우)를 위해, 하위 수준의 PEP 587 PyConfig API는 계속 사용 가능하다.
+
+
+## Platform 지원
 ### Emscripten is now an officially supported platform, at tier 3.
 ## Release changes
 ### Free-threaded Python is officially supported
