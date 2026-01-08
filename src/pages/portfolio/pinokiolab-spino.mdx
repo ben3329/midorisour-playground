@@ -107,11 +107,16 @@ import PortfolioLayout from '@site/src/components/PortfolioLayout';
           - 사용자가 임의로 강제 종료하는 상황까지 고려해야 했기에 Front에서는 수정한 수치만 전달하는 것으로 결정함
       - OpenCV, Pillow를 사용하여 오버레이 된 이미지 생성
         - Pillow는 느리지만 폰트 적용을 위해 사용
-  - Front Code Generator 이슈 해결
-    - Front에서는 FastAPI에서 자동으로 생성한 openapi.json을 기반으로 코드 생성기를 사용 중
-    - 히스토리 검색 API의 경우 FastAPI Filter 라이브러리를 사용했는데 해당 라이브러리를 사용할 경우 GET Query에 Optional을 반드시 사용해야 해서 openapi.json에 anyOf로 들어갔음
-    - 이 경우 코드 생성기에서 null 값이 아니라 빈 문자열을 넣어 주게 되어있어 의도하지 않은 일이 발생함
-    - 일반적인 경우 비필수 파라미터의 경우 pram:type = Query(None)으로 정의해도 json에서 "required": false로 들어갔기에 문제가 없었음
-    - FastAPI의 Depends, FastAPI Filter의 FilterDepends 코드를 분석하여 
+    - Front Code Generator 이슈 해결
+      - Front에서는 FastAPI에서 자동으로 생성한 openapi.json을 기반으로 코드 생성기를 사용 중
+      - 히스토리 검색 API의 경우 FastAPI Filter 라이브러리를 사용했는데 해당 라이브러리를 사용할 경우 GET Query에 Optional을 반드시 사용해야 해서 openapi.json에 anyOf로 들어갔음
+      - 이 경우 코드 생성기에서 null 값이 아니라 빈 문자열을 넣어 주게 되어있어 의도하지 않은 일이 발생함
+      - 일반적인 경우 비 필수 파라미터의 경우 pram:type = Query(None)으로 정의해도 json에서 "required": false로 들어갔기에 문제가 없었음
+      - FastAPI의 Depends, FastAPI Filter의 FilterDepends 코드를 분석하여 FilterDepends를 오버라이드 하는 방식으로 문제 해결
+  - Frontend 개발
+    - App의 소셜 로그인, 약관 동의, 히스토리, 설정 화면 개발
+  - DNS 등 AWS 인프라 설정
+    - Route53을 통한 도메인 연결
+    - SSL 인증서 발급 및 연결
 </PortfolioLayout>
 

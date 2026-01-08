@@ -8,11 +8,9 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 
 <ReleaseMeta date="2025-10-07"/>
 
-## <span style={{ color: 'red' }}>아직 작성 중입니다.</span>
+## Interpreter 개선
 
-## Interpreter 향상
-
-### Deferred evaluation of annotations
+### annotations 지연 평가
 이전까지 annotation은 선언 즉시 평가되어, 미정의 타입을 사용하면 에러가 났다.
 ```Python
 >>> def func(arg:Undefined):
@@ -21,7 +19,6 @@ link: https://docs.python.org/3/whatsnew/3.14.html
 Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 NameError: name 'Undefined' is not defined
->>> 
 ```
 
 이 문제를 피하려고 문자열 형태로 감싸는 방식이 널리 쓰였다.
@@ -78,7 +75,6 @@ NameError: name 'Undefined' is not defined
 ... 
 >>> get_annotations(func, format=Format.VALUE)
 {'arg': <class '__main__.Undefined'>}
->>> 
 ```
 아래 코드로 테스트를 해보면 성능이 얼마나 좋아졌는지 확인할 수 있다.
 ```Python
@@ -115,26 +111,521 @@ ben3329@DESKTOP-F5GR6BH:~/test_3.13$ python test.py
 Duration: 0.2938 seconds
 ```
 
-### Multiple interpreters in the standard library
+### standard library에서 다중 인터프리터 지원
+
+기존에 CPython은 하나의 프로세스 안에서 여러 인터프리터를 실행할 수 있는 C 확장 기능을 제공해왔다.
+이 기능은 C-API를 통해서만 사용이 가능해서 Python 코드만으로는 사용이 불가능했다.
+이번 릴리즈에서 concurrent.interpreters 모듈이 추가 되면서 해당 기능을 사용할 수 있게 되었다.
+
+동시성을 구현하기 위해서는 보통 threading 모델을 사용하는데 이는 구현 및 유지보수가 어려웠다.
+하지만 이제 이 모듈이 추가되어 Communicating Sequential Processes (CSP), Actor Model 같은 동시성 모델을 적용할 수 있게 되었다.
+
+* CSP: 공유 메모리를 직접 수정하는 대신, 채널을 통해 상태 변경 내용을 전달하여 각 프로세스가 자신만의 상태를 안전하게 업데이트하도록 하는 모델
+  * `Channel1, Process1{LocalState1, Channel1}, Process2{LocalState2, Channel1}`
+* Actor Model: 공유 상태 없이 각 액터가 독립 상태를 관리하고, 메시지를 통해서만 상태 변경이나 통신을 비동기적으로 수행하는 동시성 모델
+  * `Actor1{State1, Mailbox1}, Actor2{State2, Mailbox2}`
+
+multiple interpreters와 multiprocessing은 서로 격리된 논리적 프로세스를 사용하고, 메모리 공유가 없다는 점에서 유사하다.
+하지만 더 적은 시스템 리소스를 사용하고 더 효율적으로 동작한다.
+바꿔말하면 multiprocessing의 격리성과 multithreading의 효율성을 동시에 갖춘 모델이라고 할 수 있다.
+
+멋진 기능이지만 아직 몇 가지 제약 사항이 있다.
+* 인터프리터 시작 속도가 아직 최적화 되지 않음
+* 인터프리터당 메모리 사용량이 필요 이상으로 큼
+* memoryview를 제외하면 실질적인 객체/데이터 공유 옵션이 부족
+* 많은 PyPI third-party 라이브러리들이 현재 multiple interpreters를 지원하지 않음
+* Python 사용자에게 익숙하지 않은 프로그래밍 방식
+  * exec 메서드를 사용해 문자열 형태로 코드를 넣어줘야 한다.
+    ```Python
+    interp.exec(
+        """
+      while True:
+          task = tasks.get()
+          if task is None:
+              results.put(("stopped", None))
+              break
+
+          n = task
+          results.put(("result", (n, n * n)))
+        """
+    )
+    ```
+  * call 메서드가 있긴 하지만 blocking이어서 메인 스레드에 영향이 간다. 스레드를 별도로 생성하는 방법도 있지만, 그러면 라이프사이클 관리를 메인 스레드에서 해야 한다.
+
 ### Template strings
-### Allow except and except* expressions without brackets
-### Control flow in finally blocks
-### Safe external debugger interface for CPython
-### A new type of interpreter
-### Free-threaded mode improvements
-### Improved error messages
-### Incremental garbage collection
-## Significant improvements in the standard library
-### Zstandard support in the standard library
-### Asyncio introspection capabilities
+
+Template strings는 custom 문자열 처리를 위한 새로운 메커니즘이다.
+f-strings와 유사하지만, str 객체를 반환하지 않고 문자열의 정적 부분과 보간 부분을 나타내는 객체를 반환한다.
+
+t-string 사용법은 단순히 f-string에서 f 접두사를 t로 바꾸면 된다.
+```Python
+>>> var = 52
+>>> template = t"Value is {var}"
+>>> template
+Template(strings=('Value is ', ''), interpolations=(Interpolation(52, 'var', None, ''),))
+```
+
+이터레이션을 통해 Template 객체의 정적 부분과 중괄호로 감싸진 보간 부분에 순서대로 접근할 수 있다.
+```Python
+>>> list(template)
+['Value is ', Interpolation(52, 'var', None, '')]
+```
+
+t-string이 도입되면 개발자는 사용자 입력을 안전하게 처리하는 시스템을 만들 수 있다. 아래는 그 예시다.
+* sanitise SQL
+* 안전한 셸 명령 생성
+* 개선된 로깅
+* HTML/CSS 등 최신 웹 개발 아이디어 반영
+* 경량화된 맞춤형 비즈니스 DSL(Domain-Specific Language) 구현
+
+### except와 except* 표현식에서 괄호 없이 사용 가능
+
+`except`와 `except*` 표현식에서 여러 개의 예외 타입을 사용할 때 `as` 절을 사용하지 않는 경우 괄호를 생략할 수 있다.
+
+```Python
+try:
+    connect_to_server()
+except TimeoutError, ConnectionRefusedError:
+    print('The network has ceased to be!')
+```
+
+### finally blocks에서 제어 흐름 사용 시 SyntaxWarning 발생
+
+이제 `return`, `break`, `continue`가 `finally` 블록 내 사용될 때 SyntaxWarning이 발생한다.
+```Python
+>>> def func():
+...       try:
+...         return 1
+...       finally:
+...         return 2
+... 
+<stdin-4>:5: SyntaxWarning: 'return' in a 'finally' block
+```
+
+### CPython용 안전한 외부 디버거 인터페이스
+
+실행 중인 Python 프로세스에 중단하거나 재시작 없이 안전하게 디버거·프로파일러를 연결할 수 있는 '제로 오버헤드 디버깅 인터페이스'가 도입되었다.
+이 인터페이스는 런타임에 인터프리터 실행 경로 수정 등 어떠한 오버헤드도 발생시키지 않는다.
+그리고 기존에는 운영체제의 디버깅 기능인 ptrace를 이용해 프로세스의 메모리 등을 조작해 디버거를 붙였지만, 이제 이렇게 하지 않아도 된다.
+덕분에 디버그 툴들은 Python 애플리케이션과 실시간으로 안전하게 상호작용할 수 있게 되었다.
+
+편의를 위해 이 인터페이스는 `sys.remote_exec()`에 구현되었다.
+```Python
+import sys
+import os
+from tempfile import NamedTemporaryFile
+
+with NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    script_path = f.name
+    f.write(f'import my_debugger; my_debugger.connect({os.getpid()})')
+
+# Execute in process with PID 1234
+print('Behold! An offering:')
+sys.remote_exec(1234, script_path)
+```
+sys.remote_exec(pid, script)는 다음 안전 실행 지점에서 타깃 프로세스가 지정된 Python 코드를 실행하도록 보내는 기능이다. 
+도구 제작자(tool authors)는 필요하다면 PEP에 명시된 프로토콜을 참고하여 직접 인터페이스를 구현할 수도 있다. 
+
+보안이 매우 중요하기 때문에, 해당 인터페이스를 비활성화하는 안전한 접근 제어 장치도 포함되어 있다:
+* `PYTHON_DISABLE_REMOTE_DEBUG`: 환경 변수
+* `-X disable-remote-debug`: 명령줄 옵션
+* `--without-remote-debug`: 빌드 시 기능을 완전히 비활성화하는 옵션
+이를 통해 운영 환경에서 원치 않는 디버깅 접근을 차단할 수 있다.
+
+### 새로운 타입의 인터프리터
+
+CPython에 새로운 유형의 인터프리터가 추가되었다.
+이 인터프리터는 하나의 거대한 C `switch-case` 문을 사용하는 대신, 개별 Python 바이트코드를 구현하는 작은 C 함수들 사이를 tail call 방식으로 전환하며 동작한다.
+아래는 이해를 돕기 위한 예시다(실제 이렇게 동작하는지는 모른다). 
+
+* 기존 인터프리터 동작방식
+```C
+while:
+   opcode = fetch()
+   switch(opcode):
+      case X: ...
+      case Y: ...
+```
+* 새로운 인터프리터 동작방식
+```C
+void opcode_X(...) {
+   ...
+   goto opcode_Y;
+}
+```
+참고로 이는 Python 함수의 테일 콜 최적화(tail call optimization)와는 혼동해서는 안 된다. CPython에서는 함수 단위의 테일 콜 최적화는 아직 구현되어 있지 않다.
+
+최신 컴파일러를 사용하는 경우, 이 방식은 상당한 성능 향상을 제공한다.
+초기 벤치마크에 따르면 표준 pyperformance 벤치마크에서 기하 평균 3-5% 정도 더 빠른 성능을 보여준다.
+비교 기준은 이 새로운 인터프리터를 사용하지 않은, Clang 19로 빌드한 Python 3.14이다.
+
+현재 이 인터프리터는 Clang 19 이상, x86-64 및 AArch64 아키텍처에서만 동작한다. 하지만 향후 GCC에서도 이를 지원할 예정이다.
+이 기능은 현재 기본 옵션이 아니며, 사용자가 직접 활성화해야(opt-in) 한다.
+또한 PGO(Profile-Guided Optimization) 를 활성화하는 것이 강력히 권장되는데, 이는 해당 인터프리터에서 성능 향상이 검증된 유일한 구성 방식이기 때문이다.
+자세한 내용은 --with-tail-call-interp 옵션을 참고하면 된다.
+
+### Free-threaded mode 개선
+
+CPython의 free-threaded 모드는 3.13에서 도입되었으며, 이번 3.14에서 큰 폭으로 개선되었다.
+
+* PEP 703에서 설명된 구현이 모두 완료되었으며, C API 변경도 마무리되었고, 인터프리터 내부의 임시 우회 코드들도 영구적인 해결 방식으로 대체되었다.
+* 전문화 및 적응형 인터프리터(PEP 659) 가 Free-threaded mode에서 활성화되었으며, 여러 최적화와 함께 성능을 크게 향상시킨다.
+  현재 Free-threaded 모드에서의 단일 스레드 코드 실행 속도 저하는 플랫폼과 컴파일러에 따라 약 5-10% 수준으로 줄어들었다.
+* Windows에서 Free-threaded 모드를 사용하는 C 확장 모듈을 빌드할 때, 더이상 C 컴파일러가 자동으로 판단하지 않기 때문에 `Py_GIL_DISABLED` 전처리 변수를 정의해야 한다.
+  인터프리터에서 이 모드를 사용 했는 지 확인하려면 `sysconfig.get_config_var()`를 사용하면 된다.
+* 인터프리터 실행 시 몇가지 옵션이 추가 되었다. 
+  * `-X context_aware_warnings`: 이 플래그는 동시성 안전 Warnings 컨트롤 기능을 활성화할지 여부를 제어한다.
+    Free-threaded 빌드에서는 기본값이 `true`, 기존 빌드에서는 `false`다.
+  * `-X thread_inherit_context`: 활성화 시 `threading.Tread`로 생성된 스레드가 호출자의 `Context()`를 복사하여 시작한다.
+    이렇게 될 경우 `catch_warnings`로 설정된 경고 필터링 컨텍스트가 스레드에 "상속"된다.
+    또한 decimal 컨텍스트 매니저 등 context variables를 사용하는 다른 모듈에도 영향을 미친다.
+    Free-threaded 빌드에서는 기본값이 `true`, 기존 빌드에서는 `false`다.
+
+### error message 개선
+
+에러 메시지가 개선되었다. 전반적으로 SyntaxError 메시지가 
+
+* 키워드 오타를 감지할 경우 올바른 키워드 제안
+  * 기존
+    ```Python
+    >>> whille True:
+    File "<python-input-0>", line 1
+      whille True:
+             ^^^^
+    SyntaxError: invalid syntax
+    >>> 
+    ```
+  * 변경 후
+    ```Python
+    >>> whille True:
+      File "<python-input-1>", line 1
+        whille True:
+        ^^^^^^
+    SyntaxError: invalid syntax. Did you mean 'while'?
+    >>> 
+    ```
+* `else` 다음에 `elif`가 올 경우 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> if True:
+    ...     pass
+    ... else:
+    ...     pass
+    ... elif:
+    ...     pass
+    ...     
+      File "<python-input-1>", line 5
+        elif:
+        ^^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> if True:
+    ...     pass
+    ... else:
+    ...     pass
+    ... elif:
+    ...     pass
+    ...     
+      File "<python-input-1>", line 5
+        elif:
+        ^^^^
+    SyntaxError: 'elif' block follows an 'else' block
+    ```
+* Conditional expressions에서 else 뒤에 statement가 올 경우, 또는 if 앞에 pass, break, continue 중 하나가 올 경우 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> 1 if True else pass
+      File "<python-input-2>", line 1
+        1 if True else pass
+                       ^^^^
+    SyntaxError: invalid syntax
+    >>> pass if True else 1
+      File "<python-input-3>", line 1
+        pass if True else 1
+             ^^
+    SyntaxError: invalid syntax
+    
+    ```
+  * 변경 후
+    ```Python
+    >>> 1 if True else pass
+      File "<python-input-2>", line 1
+        1 if True else pass
+                       ^^^^
+      SyntaxError: expected expression after 'else', but statement is given
+    >>> pass if True else 1
+      File "<python-input-3>", line 1
+        pass if True else 1
+        ^^^^
+    SyntaxError: expected expression before 'if', but statement is given
+    ``` 
+* 문자열이 잘못 닫힌 경우 메시지 개선
+  * 기존
+    ```Python
+    >>> "abc "d" efg"
+      File "<python-input-7>", line 1
+        "abc "d" efg"
+              ^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> "abc "d" efg"
+      File "<python-input-4>", line 1
+        "abc "d" efg"
+              ^
+    SyntaxError: invalid syntax. Is this intended to be part of the string?
+    ```
+* 문자열 prefix 충돌 시 더 명확한 오류 메시지
+  * 기존
+    ```Python
+    >>> ub'abc'
+      File "<python-input-0>", line 1
+        ub'abc'
+          ^^^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> ub'abc'
+      File "<python-input-0>", line 1
+        ub'abc'
+        ^^
+    SyntaxError: 'u' and 'b' prefixes are incompatible
+    ```
+* `as` 구문에서 호환되지 않는 대상 사용 시 오류 메시지 개선
+  * 기존
+    ```Python
+    >>> import datetime as ...
+      File "<python-input-8>", line 1
+        import datetime as ...
+                           ^^^
+    SyntaxError: invalid syntax
+    ```
+  * 변경 후
+    ```Python
+    >>> import datetime as ...
+      File "<python-input-17>", line 1
+        import datetime as ...
+                           ^^^
+    SyntaxError: cannot use ellipsis as import target
+    ```
+* unhashable 타입을 dict/set에 사용하는 경우의 메시지 개선
+  * 기존
+    ```Python
+    >>> s = set()
+    >>> s.add({'key':123})
+    Traceback (most recent call last):
+      File "<python-input-10>", line 1, in <module>
+        s.add({'key':123})
+        ~~~~~^^^^^^^^^^^^^
+    TypeError: unhashable type: 'dict'
+    ```
+  * 변경 후
+    ```Python
+    >>> s = set()
+    >>> s.add({'key':123})
+    Traceback (most recent call last):
+      File "<python-input-19>", line 1, in <module>
+        s.add({'key':123})
+        ~~~~~^^^^^^^^^^^^^
+    TypeError: cannot use 'dict' as a set element (unhashable type: 'dict')
+    ```
+* with / async with 혼동 시 에러 메시지 개선
+  * 기존
+    ```Python
+    >>> class AsyncCM:
+    ...         async def __aenter__(self):
+    ...                 pass
+    ...         async def __aexit__(self, exc_type, exc_val, exc_tb):
+    ...                 pass
+    ...                 
+    >>> with AsyncCM():
+    ...         pass
+    ...         
+    Traceback (most recent call last):
+      File "<python-input-24>", line 1, in <module>
+        with AsyncCM():
+             ~~~~~~~^^
+    TypeError: 'AsyncCM' object does not support the context manager protocol
+    ```
+  * 변경 후
+    ```Python
+    >>> class AsyncCM:
+    ...         async def __aenter__(self):
+    ...                 pass
+    ...         async def __aexit__(self, exc_type, exc_val, exc_tb):
+    ...                 pass
+    ...                 
+    >>> with AsyncCM():
+    ...         pass
+    ...         
+    Traceback (most recent call last):
+      File "<python-input-24>", line 1, in <module>
+        with AsyncCM():
+             ~~~~~~~^^
+    TypeError: 'AsyncCM' object does not support the context manager protocol (missed __exit__ method) but it supports the asynchronous context manager protocol. Did you mean to use 'async with'?
+    ```
+
+### 점진적 가비지 컬렉션
+
+* Cycle GC가 점진적(incremental) 방식으로 동작하도록 변경되었다.
+  * 큰 힙에서 최대 일시 중지 시간이 10배 이상 줄어든다.
+* 기존에는 GC가 3세대였지만, 이제는 2세대(young, old)로 변경되었다.
+  * python GC는 객체가 오래 살아 남을수록 높은 세대로 승격시켜 높은 세대일수록 덜 수집하는 방식을 사용한다.
+  * 이 세대 구분이 2세대로 단순화되었다.
+  * gc.collect()가 직접 호출되지 않는 경우, GC가 약간 덜 자주 호출된다.
+  * 호출될 때는 하나 이상의 세대를 수집하는 대신, young 세대와 old 세대의 일부를 수집한다.
+  * gc.collect()의 동작이 약간 변경되었다.
+    * gc.collect(1): 이제 1세대를 수집하는 대신, 점진적 수집을 수행한다.
+    * 그 외의 gc.collect() 호출은 변경되지 않았다.
+
+
+## 표준 라이브러리의 주요 개선 사항
+
+### standard library에서 Zstandard 압축 지원
+
+* lzma, bz2, gzip, zlib 모듈을 re-export하는 compression 패키지가 추가되었다.
+  * compression.lzma, compression.bz2, compression.gzip, compression.zlib
+  * 기존 모듈 이름은 더이상 권장되지 않지만, 아직 폐기되지는 않았다.
+  * 기존 모듈이 폐기되거나 제거되는 시점은 3.14 릴리즈 후 최소 5년 이후가 될 것이다.
+* compression.zstd 모듈이 추가되었다.
+  * Meta의 zstd 라이브러리 바인딩을 통해 Zstandard 포맷의 압축 및 해제를 지원합니다.
+  * Zstandard는 널리 채택된, 매우 효율적이고 빠른 압축 포맷이다.
+  * compression.zstd 모듈에 도입된 API 외에도, tarfile, zipfile, shutil 모듈에서 Zstandard 압축 아카이브를 읽고 쓸 수 있는 기능이 추가되었다.
+* 사용 예시
+```Python
+from compression import zstd
+import math
+
+data = str(math.pi).encode() * 20
+compressed = zstd.compress(data)
+ratio = len(compressed) / len(data)
+print(f"Achieved compression ratio of {ratio}")
+```
+
+### asyncio의 내부 상태 조회 기능
+
+* 비동기 작업을 사용하는 Python 프로세스를 검사하기 위한 명령어가 추가되었다.
+* `python -m asyncio ps PID` 또는 `python -m asyncio pstree PID` 명령어로 사용할 수 있다.
+* `ps` 서브커맨드는 주어진 프로세스 ID(PID)를 검사하고 현재 실행 중인 asyncio 작업에 대한 정보를 표시한다.
+  작업 테이블을 출력하는데, 여기에는 모든 작업, 작업 이름, 코루틴 스택, 그리고 어떤 작업이 대기 중인지가 포함된다.
+```bash
+python -m asyncio ps 12345
+
+tid        task id              task name            coroutine stack                                    awaiter chain                                      awaiter name    awaiter id
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+1935500    0x7fc930c18050       Task-1               TaskGroup._aexit -> TaskGroup.__aexit__ -> main                                                                       0x0
+1935500    0x7fc930c18230       Sundowning           TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TaskGroup._aexit -> TaskGroup.__aexit__ -> main    Task-1          0x7fc930c18050
+1935500    0x7fc93173fa50       TMBTE                TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TaskGroup._aexit -> TaskGroup.__aexit__ -> main    Task-1          0x7fc930c18050
+1935500    0x7fc93173fdf0       TNDNBTG              sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   Sundowning      0x7fc930c18230
+1935500    0x7fc930d32510       Levitate             sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   Sundowning      0x7fc930c18230
+1935500    0x7fc930d32890       DYWTYLM              sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TMBTE           0x7fc93173fa50
+1935500    0x7fc93161ec30       Aqua Regia           sleep -> play                                      TaskGroup._aexit -> TaskGroup.__aexit__ -> album   TMBTE           0x7fc93173fa50
+```
+* `pstree` 서브커맨드는 동일한 정보를 가져오지만, 시각적인 비동기 호출 트리를 렌더링하여 코루틴 관계를 계층적 형식으로 보여준다.
+  이 명령어는 장기 실행 중이거나 stuck된 비동기 프로그램을 디버깅하는 데 특히 유용하다.
+  프로그램이 어디에서 차단되었는지, 어떤 작업이 보류 중인지, 코루틴이 어떻게 연결되어 있는지를 빠르게 식별하는 데 도움이 될 수 있다.
+  만약 async await 그래프에서 사이클이 감지되면, 도구는 오류를 발생시키고 트리 구성을 방해하는 사이클 경로를 나열한다.
+```bash
+python -m asyncio pstree 12345
+
+└── (T) Task-1
+    └──  main example.py:13
+        └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+            └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                ├── (T) Sundowning
+                │   └──  album example.py:8
+                │       └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+                │           └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                │               ├── (T) TNDNBTG
+                │               │   └──  play example.py:4
+                │               │       └──  sleep Lib/asyncio/tasks.py:702
+                │               └── (T) Levitate
+                │                   └──  play example.py:4
+                │                       └──  sleep Lib/asyncio/tasks.py:702
+                └── (T) TMBTE
+                    └──  album example.py:8
+                        └──  TaskGroup.__aexit__ Lib/asyncio/taskgroups.py:72
+                            └──  TaskGroup._aexit Lib/asyncio/taskgroups.py:121
+                                ├── (T) DYWTYLM
+                                │   └──  play example.py:4
+                                │       └──  sleep Lib/asyncio/tasks.py:702
+                                └── (T) Aqua Regia
+                                    └──  play example.py:4
+                                        └──  sleep Lib/asyncio/tasks.py:702
+```
+
 ### Concurrent safe warnings control
-### Syntax highlighting in the default interactive shell, and color output in several standard library CLIs
-## C API improvements
+
+* `context_aware_warnings` 플래그가 추가되었다. 
+* `warnings.catch_warnings` context manager에서 이 플래그가 활성화되면, 경고 필터링이 현재 컨텍스트 변수에 저장된다. 
+  따라서 여러 스레드나 비동기 작업에서 `catch_warnings`를 사용할 때 예측 가능한 경고 제어가 가능해진다.
+* 기존에는 `catch_warnings`가 전역 경고 필터링 상태를 수정했기 때문에, 동시성 환경에서 사용 시 의도치 않은 상호작용이 발생할 수 있었다.
+  이제 이 플래그를 활성화하면 각 스레드나 비동기 작업이 독립적인 경고 필터링 컨텍스트를 가질 수 있다.
+```Python
+import warnings
+# Thread A
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    do_something()
+# Thread B
+do_other_thing()  # ← Thread A의 경고 설정 영향 ❌
+```
+* 이 플래그는 -X 명령줄 옵션이나 환경 변수를 통해 설정할 수 있다. 
+  기본값은 free-threaded 빌드에서는 true, GIL이 활성화된 빌드에서는 false다.
+
+### Default Interactive Shell
+
+* 기본 interactive shell에서 syntax highlighting이 지원된다. 
+  기본적으로 활성화 되어 있으며 `PYTHON_BASIC_REPL` 환경 변수가 설정되어 있거나 색상을 비활성화하는 다른 환경 변수가 설정되어 있으면 비활성화 된다.
+  interactive shell이나 `PYTHONSTARTUP` 스크립트에서 `_colorize.set_theme()`을 호출하여 색상 테마를 변경할 수 있다.
+* 기본 interactive shell에서 import 자동 완성이 지원된다.
+
+## C API 개선
+
 ### Python configuration C API
-## Platform support
-### Emscripten is now an officially supported platform, at tier 3.
+
+* Python 초기화를 구성하는 모든 방법을 하나로 통합했다.
+  또한 Python의 preinitialization과 initialization 설정을 단일 API로 통합했다.
+  더 나아가, API를 단순화하기 위해 두 가지 선택지('Python'과 'Isolated') 대신 단 하나의 Python 임베딩 방식만을 제공한다. 
+  * `PyInitConfig`: Python 초기화 구성. C 구조체에 의존하지 않고, 향후 ABI(Application Binary Interface) 호환성을 유지한 변경 가능
+  * `PyInitConfig_AddModule()`: 내장 확장 모듈을 추가. inittab과 같음 
+  * `PyConfig_Get()`: 현재 런타임 구성을 가져오는 함수
+  * `PyConfig_Set()`: 런타임 구성을 설정하는 함수
+* 의도적으로 CPython 구현 세부사항과 더 강하게 결합된 사용 사례(예: CPython CLI의 전체 기능과 그 구성 메커니즘을 에뮬레이션하는 경우)를 위해, 하위 수준의 PEP 587 PyConfig API는 계속 사용 가능하다.
+
 ## Release changes
-### Free-threaded Python is officially supported
-### PGP signatures have been discontinued for official releases
+
+### Free-threaded Python이 공식 지원된다.
+
+* 이제 free-threaded Python 빌드는 더 이상 실험적 기능이 아니며, 공식적으로 지원된다.
+  이는 free-threaded Python이 2단계(Phase II) 에 진입했음을 의미하며, 공식 지원 대상이 되었지만 아직 기본값은 아니고 선택 사항입니다.
+* free-threading을 Python의 기본 또는 유일한 빌드로 전환하는 3단계(Phase III) 로의 이동 여부는 아직 결정되지 않았다.
+
+### PGP 서명 중단
+
+* Python 3.14 및 이후 버전의 릴리스부터는 PGP 서명이 제공되지 않는다. 
+* 대신에 CPython 아티팩트(배포 파일)의 무결성을 검증하려면, 사용자는 Sigstore 기반의 검증 자료를 사용해야 한다.
+
 ### Windows and macOS binary releases now support the experimental just-in-time compiler
-### Binary releases for Android are now provided
+
+* 공식 macOS 및 Windows용 Python 바이너리 릴리스에는 이제 실험적 JIT(Just-In-Time) 컴파일러가 포함된다.
+  * 프로덕션 환경에서의 사용은 권장되지 않지만, 환경 변수 `PYTHON_JIT=1`을 설정하여 테스트해볼 수 있다.
+  * 하위 소스 빌드나 재배포자는 `--enable-experimental-jit=yes-off` 설정 옵션을 사용하여 동일한 동작을 활성화할 수 있다.
+* 현재 JIT는 초기 단계에 있으며 활발히 개발 중이다.
+  이로 인해 JIT를 활성화했을 때의 성능 영향은 워크로드에 따라 약 10% 느려질 수도 있고, 최대 20% 빨라질 수도 있다.
+  테스트 및 평가를 돕기 위해, `sys._jit` 네임스페이스에 다양한 introspection 함수들이 제공된다.
+  * `sys._jit.is_available()`: 현재 실행 중인 Python 실행 파일이 JIT 컴파일을 지원하는지 여부를 확인
+  * `sys._jit.is_enabled()`: 현재 프로세스에서 JIT 컴파일이 활성화되어 있는지 여부를 확인
+* 현재 기준으로 가장 큰 미구현 기능은, `gdb`, `perf` 같은 네이티브 디버거 및 프로파일러가 JIT 프레임을 따라 unwinding(call stack 역추적)을 하지 못한다는 점이다.
+  다만 pdb, profile 같은 Python 레벨 디버거·프로파일러는 수정 없이 정상 동작한다.
+  또한 free-threaded Python 빌드는 JIT 컴파일을 지원하지 않는다.
+
+## Build changes
+
+* 웹에서 실행할 수 있는 Python 구현인 Emscripten Python이 PEP 776에 따라 공식적으로 tier 3 지원 플랫폼이 되었다.
+* 공식 Android 바이너리 릴리스가 이제 python.org에서 제공된다.
+
