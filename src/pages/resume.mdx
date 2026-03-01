@@ -42,19 +42,37 @@ export const experiences = [
     role: "백엔드 개발자 · 팀 리드",
     period: "2023.09 ~ 현재",
     projects: [
+      // {
+      //   name: "title",
+      //   period: "2025.02 ~ 현재",
+      //   summary:
+      //     "summary",
+      //   highlights: [
+      //     "highlight",
+      //   ],
+      //   stack: [
+      //     "tech",
+      //   ],
+      // },
       {
         name: "통관 단계 지재권 감정 지원 시스템 리뉴얼",
         period: "2025.02 ~ 현재",
         summary:
-          "",
+          "운영 중인 통관 단계 지재권 감정 시스템을 리뉴얼하면서 외부 연계·보안·성능을 중심으로 백엔드 아키텍처를 재설계하고, 고객사 전용 조회/API 시스템까지 확장했습니다.",
         highlights: [
-          "",
+          "고객사 전용 외부 데이터 조회 시스템을 별도 서비스로 분리 설계해 내부 TIMS와 격리하고, 계정/권한·증명서 발급·공개 API를 구축",
+          "AWS Cognito 기반 인증/인가와 SlowAPI + ElastiCache 기반 rate limiting·cache를 도입해 외부 접근 안정성과 운영 신뢰성 강화",
+          "복합 조회 View에 대해 Index 재설계, Computed Column, JOIN 전략 최적화를 적용해 응답 성능을 약 3초에서 0.1초 이하로 개선",
+          "개인정보 비저장 요구가 있는 의료 지표 프로젝트에서 AWS Textract 마스킹 및 오버레이 이미지 생성 파이프라인(OpenCV/Pillow) 구현",
+          "FastAPI OpenAPI 문서 체계를 고도화하고 코드 생성기 호환 이슈(FilterDepends override)를 해결해 프론트엔드 연동 생산성 향상",
         ],
-        stack: ["FastAPI", "SQLModel", "Nexus Repository"],
+        stack: [
+          "FastAPI",
+        ],
       },
       {
         name: "백엔드 공용 라이브러리 개발",
-        period: "2024.12 ~ 2025.01",
+        period: "2024.12 ~ 2024.12",
         summary:
           "사내 서비스 전반에서 중복되던 핵심 기능들을 모듈화해 Python 공용 라이브러리로 통합하고, 배포·사용 체계를 표준화했습니다.",
         highlights: [
@@ -65,42 +83,16 @@ export const experiences = [
         stack: ["FastAPI", "SQLModel", "Nexus Repository"],
       },
       {
-        name: "유통 단계 지재권 감정 지원 시스템 개발",
-        period: "2024.04 ~ 2024.12",
-        summary:
-          "기존 시스템을 FastAPI 기반으로 재구축하고, AI 감정·비정형 분석 기능을 통합한 고도화된 백엔드 아키텍처를 설계·개발했습니다.",
-        highlights: [
-          "Alembic 기반 DB 마이그레이션 도입",
-          "기존 Flask 기반 시스템을 FastAPI로 리팩토링",
-          "AI 감정 지원 기능 개발",
-          "해외 사전 지재권 검사 기능 기획 및 개발",
-          "Kubernetes + Celery + Redis 조합으로 AI 비동기 요청 파이프라인을 구성하고 CronJob으로 결과를 DB에 자동 적재",
-          "실물인증(AI) 기능의 거짓 음성 사례를 DB화해 다중 점수 기반 판별 로직을 만들고, OpenCV 마스킹으로 거짓 양성을 감소",
-          "Flutter 앱에 Kotlin/Swift 네이티브 모듈을 붙여 실시간 흐림도 확인 기능 제공",
-        ],
-        stack: [
-          "FastAPI",
-          "SQLModel",
-          "Celery",
-          "Kubernetes",
-          "Redis",
-          "OpenCV",
-          "MySQL",
-          "AWS",
-          "Flask",
-        ],
-      },
-      {
-        name: "통관 단계 지재권 감정 지원 시스템 개발",
-        period: "2023.09 ~ 2024.06",
+        name: "통관 단계 지재권 감정 지원 시스템 개발 및 유지보수",
+        period: "2023.09 ~ 현재",
         summary:
           "기존 시스템을 FastAPI 기반으로 재구축하고, 비정규화된 DB 구조를 재설계하여 시스템의 안정성과 확장성을 크게 개선했습니다.",
         highlights: [
           "Alembic 기반 DB 마이그레이션 도입",
-          "기존 Flask 기반 시스템을 FastAPI로 리팩토링",
+          "기존 Flask 기반 시스템을 FastAPI 기반으로 리팩토링",
           "정규화 되지않은 DB 스키마와 분산된 로그 구조를 정규화·중앙화",
           "권한 관리 기획 및 개발",
-          "기본 감정서 생성, 직인 관리, 공지 화면 기획 및 개발",
+          "Flutter로 기본 감정서 생성, 직인 관리 페이지 등 일부 페이지 개발",
         ],
         stack: [
           "FastAPI",
@@ -114,7 +106,7 @@ export const experiences = [
       },
       {
         name: "업무 프로세스 및 사내 문화 개선",
-        period: "2024.01 ~ 2025.04",
+        period: "2024.01 ~ 현재",
         summary:
           "팀 리드로서 개발 프로세스와 협업 체계를 정립해 조직 생산성과 의사소통 효율을 개선했습니다.",
         highlights: [
